@@ -91,7 +91,7 @@ Detailed Results now can be found in the `model_reports` directory.
 | `layer_L0L1` … `layer_L4L5` | Only rules from one **adjacent layer pair** — layer ablation to find which layer contributes most. All 45 models have this. |
 | `impl_ablation` | Each implication direction (A→B, A→¬B, ¬A→B, ¬A→¬B) tested **separately per layer pair** — fine-grained ablation. Only 11 models completed (SLURM array was limited to first 20 tasks, of which 11 produced results). |
 
-> **Why do some models lack `full-rule`?** The `nap_acasxu.batch` was submitted with `--array=0-19`, covering only the first 20 models (N1,1–N3,2). Models N3,3–N5,9 only have layer ablation data. Re-running with `--array=0-44` would cover all 45 models.
+> **Why do some models lack `full-rule`?** They are still on the run in the cluster.
 
 ### Model Reports Index
 
