@@ -83,71 +83,89 @@ T(Timeout): The rule is not verified due to timeout.
 
 Detailed Results now can be found in the `model_reports` directory.
 
+
 ### Experiment Types
 
 | Label | Meaning |
 |-------|---------|
-| `full-rule` | All rule types mined from **all layers combined**: ALWAYS_ON, ALWAYS_OFF, ALWAYS_ON+OFF, and all 4 implication directions. Acts as the main comparison baseline. |
-| `layer_L0L1` … `layer_L4L5` | Only rules from one **adjacent layer pair** — layer ablation to find which layer contributes most. All 45 models have this. |
-| `impl_ablation` | Each implication direction (A→B, A→¬B, ¬A→B, ¬A→¬B) tested **separately per layer pair** — fine-grained ablation. Only 11 models completed (SLURM array was limited to first 20 tasks, of which 11 produced results). |
+| `full-rule` | All rule types mined from all layers combined. |
+| `layer_L0L1` … `layer_L4L5` | Per-layer-pair rule verification (ablation by layer pair). |
+| `impl_ablation` | Implication directions tested separately (`A->B`, `A->!B`, `!A->B`, `!A->!B`). |
 
-> **Why do some models lack `full-rule`?** They are still on the run in the cluster.
-
-### Model Reports Index
+## Model Reports Index
 
 | Model | Experiments | Struct |
 |-------|-------------|--------|
-| [N1,1](N1_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,2](N1_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,3](N1_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,4](N1_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,5](N1_5.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,6](N1_6.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,7](N1_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,8](N1_8.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N1,9](N1_9.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,1](N2_1.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,2](N2_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,3](N2_3.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,4](./N2_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,5](./N2_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,6](./N2_6.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,7](./N2_7.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,8](./N2_8.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N2,9](./N2_9.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N3,1](N3_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N3,2](N3_2.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
-| [N3,3](N3_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,4](N3_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,5](N3_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,6](N3_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,7](N3_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,8](N3_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N3,9](N3_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,1](N4_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,2](N4_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,3](N4_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,4](N4_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,5](N4_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,6](N4_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,7](N4_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,8](N4_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N4,9](N4_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,1](N5_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,2](N5_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,3](N5_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,4](N5_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,5](N5_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,6](N5_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,7](N5_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,8](N5_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
-| [N5,9](N5_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N1,1](./model_reports/N1_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,2](./model_reports/N1_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,3](./model_reports/N1_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,4](./model_reports/N1_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,5](./model_reports/N1_5.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,6](./model_reports/N1_6.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,7](./model_reports/N1_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,8](./model_reports/N1_8.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N1,9](./model_reports/N1_9.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,1](./model_reports/N2_1.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,2](./model_reports/N2_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,3](./model_reports/N2_3.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,4](./model_reports/N2_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,5](./model_reports/N2_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,6](./model_reports/N2_6.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,7](./model_reports/N2_7.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,8](./model_reports/N2_8.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N2,9](./model_reports/N2_9.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N3,1](./model_reports/N3_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N3,2](./model_reports/N3_2.md) | impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, full-rule | ✅ |
+| [N3,3](./model_reports/N3_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,4](./model_reports/N3_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,5](./model_reports/N3_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,6](./model_reports/N3_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,7](./model_reports/N3_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,8](./model_reports/N3_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N3,9](./model_reports/N3_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,1](./model_reports/N4_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,2](./model_reports/N4_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,3](./model_reports/N4_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,4](./model_reports/N4_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,5](./model_reports/N4_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,6](./model_reports/N4_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,7](./model_reports/N4_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,8](./model_reports/N4_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N4,9](./model_reports/N4_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,1](./model_reports/N5_1.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,2](./model_reports/N5_2.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,3](./model_reports/N5_3.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,4](./model_reports/N5_4.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,5](./model_reports/N5_5.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,6](./model_reports/N5_6.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,7](./model_reports/N5_7.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,8](./model_reports/N5_8.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+| [N5,9](./model_reports/N5_9.md) | layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5 | ✅ |
+
+Additional CIFAR reports:
+- [cifar_deep_kw](./model_reports/cifar_deep_kw.md)
+- [cifar_wide_kw](./model_reports/cifar_wide_kw.md)
+
+## Key Insights
+
+1. In ACAS full-rule experiments, baseline (`none`) remains `0/3024` robust queries at all alpha levels.
+2. `3024` is the total ACAS query count per rule and per alpha, aggregated over all 45 reported models (`24×80 + 9×64 + 9×48 + 3×32 = 3024`).
+3. The strongest full-rule family is consistently early-layer implication (`Impl L0→L1`):  
+   `903/3024 (29.9%)` at `alpha=0.90`, `353/3024 (11.7%)` at `alpha=0.95`, and `12/3024 (0.4%)` at `alpha=0.99`.
+4. Implication-type ablation (partial coverage: 11 models at `alpha=0.90`, 5 at `0.95`, 4 at `0.99`) shows:
+   - `alpha=0.90`: `!A->!B` = `379/3280 (11.6%)`, `A->!B` = `330/3280 (10.1%)`, `A->B` = `156/3280 (4.8%)`, `!A->B` = `130/3280 (4.0%)`.
+   - `alpha=0.95`: `A->!B` = `32/1120 (2.9%)`, `!A->!B` = `28/1120 (2.5%)`, `A->B` = `0/1120`, `!A->B` = `0/1120`.
+   - `alpha=0.99`: all four implication types are `0`.
+5. Rule utility is concentrated in early layers: `L0→L1` dominates, while `L4→L5` drops to `2.2%` (`alpha=0.90`), `0.3%` (`0.95`), and `0.0%` (`0.99`).
+6. CIFAR results are very strong in the completed runs: all reported queries are robust (`100% Y`) for `cifar_deep_kw` (`alpha=0.90/0.95/0.99`) and `cifar_wide_kw` (`alpha=0.90/0.95`) with the baseline, they are already robust even just with the baseline.
 
 
-## Conclusion
+## Notes
 
-For CIFAR models currently we only have 2 models verified by Marabou. And the broad one is still on the run. The Deep one illustrates that it is already robust to the perturbation with epsilon 0.20. See CIFAR Deep model [cifar_deep_kw.md](./model_reports/cifar_deep_kw.md).
+The results now are not completed, what and it will get updated when new results released from the cluster.
 
+### Still Running
+ Update time: Feb 27th 2026
+ - The rest part of ACASXu sets.
+ - The mnist- 2 layer 4 layer, 6 layer models.
 
-Implication and ALWAYS_ON/ALWAYS_OFF rules are useful in some models with limited epsilon
-Implication rules are more powerful who is mined from the first 2 layers analyzed so far
