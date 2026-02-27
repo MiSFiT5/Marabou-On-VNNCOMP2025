@@ -36,6 +36,9 @@ to assess which models are tractable for NAP-based verification.
 | sat_relu | 49/98 | SAT-encoded networks; non-standard semantics |
 | metaroom_2023 | 19/100 | Robotic perception CNNs; high timeout rate |
 
+The models not listed here represents the verification by Marabou failed because of structure errors or something else.
+For example the VGG, YOLO and ViT.
+
 **NAP applicability:** NAP requires (1) standard ReLU MLP architecture and (2) continuous 
 ε-ball perturbation properties with available training data. Among verifiable benchmarks, 
 only **acasxu_2023** satisfies all criteria. Two CIFAR-10 models from the `relusplitter` 
