@@ -1,4 +1,4 @@
-# Verification on VNNCOMP2025
+# Marabou Verification on VNNCOMP2025 - Specifications
 
 ## Overview steps
 
