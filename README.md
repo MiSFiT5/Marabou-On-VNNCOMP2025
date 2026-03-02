@@ -97,88 +97,12 @@ Detailed Results now can be found in the `model_reports` directory.
 
 # Model Reports Index
 
+Auto-generated per-model verification reports.
+
 | Model | Experiments | Struct |
 |-------|-------------|--------|
-| [N1,1](./model_reports/N1_1.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N1,2](./model_reports/N1_2.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N1,3](./model_reports/N1_3.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N1,4](./model_reports/N1_4.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N1,5](./model_reports/N1_5.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N1,6](./model_reports/N1_6.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N1,7](./model_reports/N1_7.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N1,8](./model_reports/N1_8.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N1,9](./model_reports/N1_9.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,1](./model_reports/N2_1.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,2](./model_reports/N2_2.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N2,3](./model_reports/N2_3.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,4](./model_reports/N2_4.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N2,5](./model_reports/N2_5.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N2,6](./model_reports/N2_6.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,7](./model_reports/N2_7.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,8](./model_reports/N2_8.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N2,9](./model_reports/N2_9.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N3,1](./model_reports/N3_1.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,2](./model_reports/N3_2.md) | full-rule, impl_ablation, layer_L0L1…L4L5 | ✅ |
-| [N3,3](./model_reports/N3_3.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,4](./model_reports/N3_4.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,5](./model_reports/N3_5.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,6](./model_reports/N3_6.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,7](./model_reports/N3_7.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,8](./model_reports/N3_8.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N3,9](./model_reports/N3_9.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,1](./model_reports/N4_1.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,2](./model_reports/N4_2.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,3](./model_reports/N4_3.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,4](./model_reports/N4_4.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,5](./model_reports/N4_5.md) | full-rule, layer_L0L1…L2L3 *(partial)* | ✅ |
-| [N4,6](./model_reports/N4_6.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,7](./model_reports/N4_7.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,8](./model_reports/N4_8.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N4,9](./model_reports/N4_9.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,1](./model_reports/N5_1.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,2](./model_reports/N5_2.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,3](./model_reports/N5_3.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,4](./model_reports/N5_4.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,5](./model_reports/N5_5.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,6](./model_reports/N5_6.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,7](./model_reports/N5_7.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,8](./model_reports/N5_8.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-| [N5,9](./model_reports/N5_9.md) | full-rule, layer_L0L1…L4L5 | ✅ |
-
-Additional model reports:
-- [cifar_deep_kw](./model_reports/cifar_deep_kw.md)
-- [cifar_wide_kw](./model_reports/cifar_wide_kw.md)
-
-## Key Insights
-
-1. In ACAS full-rule experiments, baseline (`none`) remains `0/3024` robust queries at all alpha levels.
-2. `3024` is the total ACAS query count per rule and per alpha, aggregated over all 45 reported models (`24×80 + 9×64 + 9×48 + 3×32 = 3024`).
-3. The strongest full-rule family is consistently early-layer implication (`Impl L0→L1`):  
-   `903/3024 (29.9%)` at `alpha=0.90`, `353/3024 (11.7%)` at `alpha=0.95`, and `12/3024 (0.4%)` at `alpha=0.99`.
-4. Implication-type ablation (partial coverage: 11 models at `alpha=0.90`, 5 at `0.95`, 4 at `0.99`) shows:
-   - `alpha=0.90`: `!A->!B` = `379/3280 (11.6%)`, `A->!B` = `330/3280 (10.1%)`, `A->B` = `156/3280 (4.8%)`, `!A->B` = `130/3280 (4.0%)`.
-   - `alpha=0.95`: `A->!B` = `32/1120 (2.9%)`, `!A->!B` = `28/1120 (2.5%)`, `A->B` = `0/1120`, `!A->B` = `0/1120`.
-   - `alpha=0.99`: all four implication types are `0`.
-5. Rule utility is concentrated in early layers: `L0→L1` dominates, while `L4→L5` drops to `2.2%` (`alpha=0.90`), `0.3%` (`0.95`), and `0.0%` (`0.99`).
-6. CIFAR results are very strong in the completed runs: all reported queries are robust (`100% Y`) for `cifar_deep_kw` (`alpha=0.90/0.95/0.99`) and `cifar_wide_kw` (`alpha=0.90/0.95`) with the baseline, they are already robust even just with the baseline.
-
-
-## Notes
-
-The results are not yet completed and will be updated when new results are released from the cluster.
-
-### Progress (Updated: March 2nd, 2026)
-
-**ACAS Xu** — 83.5% complete (789/945):
-- ✅ Exp A (full-rule): 100% done (135/135)
-- 🟡 Exp B (per-layer): ~94% done (634/675), 41 configs still missing
-- 🔴 Exp C (impl_ablation): ~15% done (20/135), 115 configs remaining
-
-**MNIST** — preprocessing complete, verification pending:
-- ✅ Patterns + rules extracted for all 3 models (256x2, 256x4, 256x6)
-- ❌ Verification timed out before producing CSV results
-- Re-submitted with optimized ordering (α=0.99 first, smallest experiments first)
-
+| [N1,1](./N1_1.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
+| [N1,2](./N1_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N1,3](./N1_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N1,4](./N1_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N1,5](./N1_5.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
@@ -247,7 +171,8 @@ Additional CIFAR reports:
 The results now are not completed, what and it will get updated when new results released from the cluster.
 
 ### Still Running
- Update time: Feb 27th 2026
+ Update time: March 2nd, 2026
  - The rest part of ACASXu sets.
+ - Updated with the ACASXu, but not completed.
  - The mnist- 2 layer 4 layer, 6 layer models.
 
