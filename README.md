@@ -132,7 +132,7 @@ Auto-generated per-model verification reports.
 | [N4,2](./N4_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N4,3](./N4_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N4,4](./N4_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,5](./N4_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
+| [N4,5](./N4_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N4,6](./N4_6.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N4,7](./N4_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N4,8](./N4_8.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
@@ -146,7 +146,8 @@ Auto-generated per-model verification reports.
 | [N5,7](./N5_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N5,8](./N5_8.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
 | [N5,9](./N5_9.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-
+| [cifar_deep_kw](./cifar_deep_kw.md) | full-rule | ❌ |
+| [cifar_wide_kw](./cifar_wide_kw.md) | full-rule | ❌ |
 
 Additional CIFAR reports:
 - [cifar_deep_kw](./model_reports/cifar_deep_kw.md)
