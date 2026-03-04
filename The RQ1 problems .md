@@ -6,10 +6,10 @@ NAP patterns usually not complete, the neurons in the NAP patterns are the neuro
 
 [x, 0, 1, x, 1, 0]
 
-3 possible choices for drawing the new samples starts with the NAP
+## 3 possible choices for drawing the new samples starts with the NAP
 
 - Directly start with the NAP patterns [x, 0, 1, x, 1, 0]
-    - sampling from the neighbour regions(MCMC)
+    - sampling from the neighbour regions(MCMC- Markov Chain + Monte Carlo - metropolis)
 
 - complete the activations patterns → all ReLU units
     - randomly fix of unfixed neurons [x, 0, 1, x, 1, 0] → [1, 0, 1, 1, 1, 0],….
@@ -54,6 +54,37 @@ NAP patterns usually not complete, the neurons in the NAP patterns are the neuro
     Liminations:
     
     - Not Reliable
+
+## MCMC Implementation Details
+
+The MCMC used here is a **Block-coordinate Random Walk Metropolis** with an oracle feasibility check, implemented in `rq_clean/rq1_sampler.py`.
+
+### Core Algorithm
+
+**Goal**: Draw diverse samples from the NAP feasible region $\mathcal{R}_\text{NAP}$, which cannot be expressed analytically — only checked by running the network.
+
+**Each step**:
+1. **Propose**: randomly select ~1% of pixel dimensions (≈8 out of 784), add Gaussian noise $\delta \sim \mathcal{N}(0, \sigma)$
+   $$x' = x + \delta, \quad x' \leftarrow \text{clip}(x', 0, 1)$$
+2. **Check (Oracle)**: run ONNX inference on $x'$, check all NAP rules on pre-activation values
+   - `ALWAYS_ON` neuron $(l, j)$: require $z_l^{(j)} > 0$
+   - `ALWAYS_OFF` neuron $(l, j)$: require $z_l^{(j)} < 0$
+3. **Accept/Reject**: if all rules satisfied → $x \leftarrow x'$; otherwise keep $x$
+
+### Mechanisms
+
+| Mechanism | Purpose | Parameter |
+|---|---|---|
+| **Burn-in** | Discard early samples biased toward the seed; wait for chain to reach stationary distribution | 600 steps |
+| **Thinning** | Each step only moves ~8 pixels, so adjacent samples are highly correlated; collect every 10th step to reduce autocorrelation | every 10 steps |
+| **Adaptive step size** | Target ~30% acceptance rate: too large → rejected too often; too small → slow exploration. Scale $\sigma$ every 50 steps based on actual rate | target 30% |
+| **Multiple chains** | 6 independent chains from different seeds for broader coverage | 6 chains |
+
+### Why "Metropolis" and not standard MH?
+
+Standard Metropolis-Hastings uses an acceptance ratio $\min(1, \pi(x')/\pi(x))$. Here, the "distribution" $\pi$ is the **indicator of the feasible region** (uniform inside $\mathcal{R}_\text{NAP}$, zero outside), so the ratio is either $\infty$ (accept), 0 (reject), or 1 (accept with certainty). This simplifies to the **accept-if-feasible** rule used here.
+
+---
 
 ## Overall Visualizations of Samples
 
