@@ -106,36 +106,60 @@ NAP patterns usually not complete, the neurons in the NAP patterns are the neuro
 
 ### MNIST 256x4 alpha = 0.95 [ Selected ]
 
-![image.png](The%20RQ1%20problems/image%201.png)
+![class7](The%20RQ1%20problems/image_256x4_095/class7.png)
 
-![image.png](The%20RQ1%20problems/image%202.png)
+![class9](The%20RQ1%20problems/image_256x4_095/class9.png)
 
 ### MNIST 256x4 alpha = 0.99 [ Selected ]
 
-![image.png](The%20RQ1%20problems/image%203.png)
+![class0](The%20RQ1%20problems/image_256x4_099/class0.png)
 
-![image.png](The%20RQ1%20problems/image%204.png)
+![class1](The%20RQ1%20problems/image_256x4_099/class1.png)
 
-![image.png](The%20RQ1%20problems/image%205.png)
+![class2](The%20RQ1%20problems/image_256x4_099/class2.png)
 
 ### MNIST 256x4 alpha = 0.95 Full Results
 
-![image.png](The%20RQ1%20problems/image%206.png)
+![class0](The%20RQ1%20problems/image_256x4_095/class0.png)
 
-![image.png](The%20RQ1%20problems/image%207.png)
+![class1](The%20RQ1%20problems/image_256x4_095/class1.png)
 
-![image.png](The%20RQ1%20problems/image%208.png)
+![class2](The%20RQ1%20problems/image_256x4_095/class2.png)
 
-![image.png](The%20RQ1%20problems/image%209.png)
+![class3](The%20RQ1%20problems/image_256x4_095/class3.png)
 
-![image.png](The%20RQ1%20problems/image%2010.png)
+![class4](The%20RQ1%20problems/image_256x4_095/class4.png)
 
-![image.png](The%20RQ1%20problems/image%2011.png)
+![class5](The%20RQ1%20problems/image_256x4_095/class5.png)
 
-![image.png](The%20RQ1%20problems/image%2012.png)
+![class6](The%20RQ1%20problems/image_256x4_095/class6.png)
 
-![image.png](The%20RQ1%20problems/image%2013.png)
+![class7](The%20RQ1%20problems/image_256x4_095/class7.png)
 
-![image.png](The%20RQ1%20problems/image%2014.png)
+![class8](The%20RQ1%20problems/image_256x4_095/class8.png)
 
-![image.png](The%20RQ1%20problems/image%2015.png)
+![class9](The%20RQ1%20problems/image_256x4_095/class9.png)
+
+
+### MNIST 256x4 alpha = 0.99 Full Results
+
+![class0](The%20RQ1%20problems/image_256x4_099/class0.png)
+
+![class1](The%20RQ1%20problems/image_256x4_099/class1.png)
+
+![class2](The%20RQ1%20problems/image_256x4_099/class2.png)
+
+![class3](The%20RQ1%20problems/image_256x4_099/class3.png)
+
+![class4](The%20RQ1%20problems/image_256x4_099/class4.png)
+
+![class5](The%20RQ1%20problems/image_256x4_099/class5.png)
+
+![class6](The%20RQ1%20problems/image_256x4_099/class6.png)
+
+![class7](The%20RQ1%20problems/image_256x4_099/class7.png)
+
+![class8](The%20RQ1%20problems/image_256x4_099/class8.png)
+
+![class9](The%20RQ1%20problems/image_256x4_099/class9.png)
+
