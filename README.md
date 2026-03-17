@@ -98,6 +98,18 @@ A second set of reports is available in [`model_reports_per_property/`](./model_
 
 See the [per-property aggregated report](./model_reports_per_property/All_Models_Aggregated.md) for headline numbers.
 
+### MNIST Reports (NEW)
+
+MNIST verification reports are available in [`mnist_reports/`](./mnist_reports/README.md), covering three fully-connected ReLU models of increasing depth:
+
+| Model | Architecture | Best NAP Y% (ε=0.02, α=0.90) |
+|-------|-------------|-------------------------------|
+| mnist256x2 | 784→256→256→10 | **99.7%** |
+| mnist256x4 | 784→(256)×4→10 | **72.2%** |
+| mnist256x6 | 784→(256)×6→10 | **57.5%** |
+
+See the [MNIST aggregated report](./mnist_reports/All_Models_Aggregated.md) for full results.
+
 
 ### Experiment Types
 
@@ -184,6 +196,7 @@ Additional CIFAR reports:
 The results now are not completed, what and it will get updated when new results released from the cluster.
 
 ### Still Running
- Update time: March 17st, 2026
- - The mnist- 2 layer 4 layer, 6 layer models.
+ Update time: March 17th, 2026
+ - MNIST per-layer and impl ablation experiments (partially complete).
+ - mnist256x4: 9 full-rule experiments missing (classes 0, 1, 8, 9 at some alpha values).
 
