@@ -86,6 +86,18 @@ T(Timeout): The rule is not verified due to timeout.
 
 Detailed Results now can be found in the `model_reports` directory.
 
+### Per-Property Reports (NEW)
+
+A second set of reports is available in [`model_reports_per_property/`](./model_reports_per_property/README.md), with three key differences from the original `model_reports/`:
+
+| Aspect | `model_reports/` | `model_reports_per_property/` |
+|--------|-----------------|------------------------------|
+| Reference point | Random training sample | Property midpoint |
+| Rule mining | Per-model (shared across properties) | Per-property |
+| Rule cap | max_rules=3000, max_unary=3000 | No limit (all rules) |
+
+See the [per-property aggregated report](./model_reports_per_property/All_Models_Aggregated.md) for headline numbers.
+
 
 ### Experiment Types
 
@@ -172,8 +184,6 @@ Additional CIFAR reports:
 The results now are not completed, what and it will get updated when new results released from the cluster.
 
 ### Still Running
- Update time: March 2nd, 2026
- - The rest part of ACASXu sets.
- - Updated with the ACASXu, but not completed.
+ Update time: March 17st, 2026
  - The mnist- 2 layer 4 layer, 6 layer models.
 

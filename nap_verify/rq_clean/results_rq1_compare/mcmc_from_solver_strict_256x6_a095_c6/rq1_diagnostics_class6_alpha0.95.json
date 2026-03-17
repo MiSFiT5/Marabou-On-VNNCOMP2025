@@ -1,0 +1,22 @@
+{
+  "chosen_step_size": 0.0001,
+  "seed_feasible_count": 12,
+  "seed_total_count": 12,
+  "step_candidates": [
+    0.0001,
+    3e-05,
+    1e-05,
+    3e-06,
+    1e-06
+  ],
+  "n_samples": 20,
+  "feasibility_rate": 1.0,
+  "margin_mean": 7.563007020774833e-11,
+  "margin_std": 6.397101436192568e-11,
+  "margin_min": 3.5797827522955614e-12,
+  "margin_p10": 1.1523320679639413e-11,
+  "mean_nn_dist": 0.0033992580138146877,
+  "mean_pairwise_dist": 10.779642105102539,
+  "mean_dist_from_seeds": 0.013196615502238274,
+  "pixel_variance_mean": 0.08568909019231796
+}
