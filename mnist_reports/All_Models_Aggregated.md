@@ -1,15 +1,15 @@
 # MNIST — Aggregated Results
 
-> Generated 2026-03-17  
+> Generated 2026-03-18  
 > Experiments: per-class, no rule cap
 
-- **Total CSV rows:** 84,520
-- **Verification rows (excl skipped):** 76,068
+- **Total CSV rows:** 98,760
+- **Verification rows (excl skipped):** 88,884
 - **Models:** mnist256x2, mnist256x4, mnist256x6
 - **Classes:** 0–9
 - **Full-rule experiments:** 81
-- **Per-layer experiments:** 226
-- **Impl ablation experiments:** 31
+- **Per-layer experiments:** 238
+- **Impl ablation experiments:** 44
 
 ## Baseline (no NAP rules)
 
@@ -26,19 +26,19 @@
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 299 | 0 | 457 | 756 | 39.6% |
-| 0.05 | 0 | 106 | 650 | 756 | 0.0% |
-| 0.10 | 0 | 358 | 398 | 756 | 0.0% |
-| 0.20 | 0 | 539 | 217 | 756 | 0.0% |
+| 0.02 | 299 | 0 | 475 | 774 | 38.6% |
+| 0.05 | 0 | 106 | 668 | 774 | 0.0% |
+| 0.10 | 0 | 367 | 407 | 774 | 0.0% |
+| 0.20 | 0 | 550 | 224 | 774 | 0.0% |
 
 ### mnist256x6
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 720 | 0 | 864 | 1584 | 45.5% |
-| 0.05 | 0 | 0 | 1584 | 1584 | 0.0% |
-| 0.10 | 0 | 0 | 1584 | 1584 | 0.0% |
-| 0.20 | 0 | 3 | 1581 | 1584 | 0.0% |
+| 0.02 | 747 | 0 | 1044 | 1791 | 41.7% |
+| 0.05 | 0 | 0 | 1791 | 1791 | 0.0% |
+| 0.10 | 0 | 0 | 1791 | 1791 | 0.0% |
+| 0.20 | 0 | 3 | 1788 | 1791 | 0.0% |
 
 ## Full-Rule NAP — best across rule types per (model, class)
 
@@ -118,5 +118,5 @@ At least one NAP rule type achieves Y for a given (model, class, epsilon, target
 | Model | Layers | Classes | Full-Rule | Per-Layer | Impl Ablation | Best Y% (ε=0.02, α=0.90) |
 |-------|--------|---------|-----------|-----------|---------------|--------------------------|
 | [mnist256x2](mnist256x2.md) | 2 | 10 | 30 | 30 | 18 | 99.7% |
-| [mnist256x4](mnist256x4.md) | 4 | 8 | 21 | 58 | 5 | 72.2% |
-| [mnist256x6](mnist256x6.md) | 6 | 10 | 30 | 138 | 8 | 57.5% |
+| [mnist256x4](mnist256x4.md) | 4 | 8 | 21 | 58 | 7 | 72.2% |
+| [mnist256x6](mnist256x6.md) | 6 | 10 | 30 | 150 | 19 | 57.5% |

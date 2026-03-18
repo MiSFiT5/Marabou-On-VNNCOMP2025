@@ -2,7 +2,7 @@
 
 > **MNIST** — mnist256x2 (2 hidden layers, 256 neurons each)  
 > Per-class experiments, no rule cap  
-> Generated 2026-03-17
+> Generated 2026-03-18
 
 **Model file:** `mnist-net_256x2.onnx`  
 **Architecture:** 784 → 256 → 256 → 10  
