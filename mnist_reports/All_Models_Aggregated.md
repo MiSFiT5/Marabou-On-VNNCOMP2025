@@ -3,13 +3,13 @@
 > Generated 2026-03-18  
 > Experiments: per-class, no rule cap
 
-- **Total CSV rows:** 98,760
-- **Verification rows (excl skipped):** 88,884
+- **Total CSV rows:** 106,640
+- **Verification rows (excl skipped):** 95,976
 - **Models:** mnist256x2, mnist256x4, mnist256x6
 - **Classes:** 0–9
 - **Full-rule experiments:** 81
-- **Per-layer experiments:** 238
-- **Impl ablation experiments:** 44
+- **Per-layer experiments:** 239
+- **Impl ablation experiments:** 52
 
 ## Baseline (no NAP rules)
 
@@ -26,19 +26,19 @@
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 299 | 0 | 475 | 774 | 38.6% |
-| 0.05 | 0 | 106 | 668 | 774 | 0.0% |
-| 0.10 | 0 | 367 | 407 | 774 | 0.0% |
-| 0.20 | 0 | 550 | 224 | 774 | 0.0% |
+| 0.02 | 299 | 0 | 484 | 783 | 38.2% |
+| 0.05 | 0 | 106 | 677 | 783 | 0.0% |
+| 0.10 | 0 | 372 | 411 | 783 | 0.0% |
+| 0.20 | 0 | 559 | 224 | 783 | 0.0% |
 
 ### mnist256x6
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 747 | 0 | 1044 | 1791 | 41.7% |
-| 0.05 | 0 | 0 | 1791 | 1791 | 0.0% |
-| 0.10 | 0 | 0 | 1791 | 1791 | 0.0% |
-| 0.20 | 0 | 3 | 1788 | 1791 | 0.0% |
+| 0.02 | 747 | 0 | 1116 | 1863 | 40.1% |
+| 0.05 | 0 | 0 | 1863 | 1863 | 0.0% |
+| 0.10 | 0 | 0 | 1863 | 1863 | 0.0% |
+| 0.20 | 0 | 4 | 1859 | 1863 | 0.0% |
 
 ## Full-Rule NAP — best across rule types per (model, class)
 
@@ -118,5 +118,5 @@ At least one NAP rule type achieves Y for a given (model, class, epsilon, target
 | Model | Layers | Classes | Full-Rule | Per-Layer | Impl Ablation | Best Y% (ε=0.02, α=0.90) |
 |-------|--------|---------|-----------|-----------|---------------|--------------------------|
 | [mnist256x2](mnist256x2.md) | 2 | 10 | 30 | 30 | 18 | 99.7% |
-| [mnist256x4](mnist256x4.md) | 4 | 8 | 21 | 58 | 7 | 72.2% |
-| [mnist256x6](mnist256x6.md) | 6 | 10 | 30 | 150 | 19 | 57.5% |
+| [mnist256x4](mnist256x4.md) | 4 | 8 | 21 | 59 | 7 | 72.2% |
+| [mnist256x6](mnist256x6.md) | 6 | 10 | 30 | 150 | 27 | 57.5% |

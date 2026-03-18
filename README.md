@@ -110,6 +110,45 @@ MNIST verification reports are available in [`mnist_reports/`](./mnist_reports/R
 
 See the [MNIST aggregated report](./mnist_reports/All_Models_Aggregated.md) for full results.
 
+### Random-Init MNIST Reports (NEW)
+
+A companion random-initialization study is available in
+[`random_init_mnist_reports/`](./random_init_mnist_reports/README.md). It
+reuses the same VNN-COMP MNIST models, reinitializes them with standard weight
+initialization schemes, keeps only `correct-by-luck` samples, and then runs
+baseline-only Marabou verification at `epsilon=0.05`.
+
+| Model | Random accuracy | Eligible classes | Y | N | T/o |
+|-------|------------------|------------------|---|---|-----|
+| mnist256x4 | 2832/60000 (4.72%) | 6/10 | 0 | 73 | 89 |
+| mnist256x6 | 6291/60000 (10.49%) | 6/10 | 0 | 0 | 162 |
+
+Important caveat: for each model, the `he/xavier/lecun` variants produced
+identical predictions in this exact zero-bias ReLU setup, so this should be
+read as a numeric-scale ablation rather than three independent random
+classifiers.
+
+See the [random-init aggregated report](./random_init_mnist_reports/All_Models_Aggregated.md)
+for the full analysis and the comparison to the trained
+[`mnist_reports/`](./mnist_reports/README.md).
+
+
+### RQ2: NAP Volume Estimation (NEW)
+
+A separate experiment estimates how large the NAP region is in the full input
+space \([0,1]^{784}\) using two independent methods on `mnist256x4` (alpha=0.95):
+
+| Method | Classes | Total Samples | NAP Hits | Conclusion |
+|--------|---------|--------------|----------|------------|
+| Box Sandwich (IBP + MC) | 10/10 | 2,000,000 | 0 | Volume ≈ 0 |
+| Beta Mixture IS | 8/10 | 4,000,000 | 0 | Volume ≈ 0 |
+
+Both methods confirm that the NAP region occupies an effectively zero fraction
+of the uniform input hypercube—a direct consequence of the curse of
+dimensionality (784D input, ~20D data manifold).
+
+See the [full RQ2 report](./rq2_box_sandwich_reports/README.md) for methodology
+details, per-class results, and analysis.
 
 ### Experiment Types
 
@@ -196,7 +235,12 @@ Additional CIFAR reports:
 The results now are not completed, what and it will get updated when new results released from the cluster.
 
 ### Still Running
- Update time: March 17th, 2026
+ Update time: March 18th, 2026
  - MNIST per-layer and impl ablation experiments (partially complete).
  - mnist256x4: 9 full-rule experiments missing (classes 0, 1, 8, 9 at some alpha values).
+ - RQ2 Box Sandwich: complete (10/10 classes). Beta IS: 8/10 complete (c0, c5 failed on cluster).
 
+
+### NEXT
+ - RQ2: Try with ACAS Xu, the method may have more meaningful results(with only 5-dimension imput)
+ - Random Initialized NN: For 3 initialization methods, they just set the bias to 0 -> also assign values to the bias.

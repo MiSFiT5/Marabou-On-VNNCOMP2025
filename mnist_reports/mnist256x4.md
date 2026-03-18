@@ -58,13 +58,13 @@
 
 | Rule | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 | Total Y% |
 |------|--------|--------|--------|--------|----------|
-| `ALWAYS_OFF (α=0.9)` | 162/162 (100.0%) | 162/162 (100.0%) | 150/162 (92.6%) | 144/162 (88.9%) | 95.4% |
-| `ALWAYS_ON (α=0.9)` | 90/162 (55.6%) | 0/162 (0.0%) | 0/162 (0.0%) | 0/162 (0.0%) | 13.9% |
-| `ALWAYS_ON+OFF (α=0.9)` | 162/162 (100.0%) | 162/162 (100.0%) | 162/162 (100.0%) | 162/162 (100.0%) | 100.0% |
-| `Impl L0→L1 (α=0.9)` | 36/54 (66.7%) | 0/54 (0.0%) | 0/54 (0.0%) | 0/54 (0.0%) | 16.7% |
+| `ALWAYS_OFF (α=0.9)` | 171/171 (100.0%) | 171/171 (100.0%) | 159/171 (93.0%) | 153/171 (89.5%) | 95.6% |
+| `ALWAYS_ON (α=0.9)` | 99/171 (57.9%) | 0/171 (0.0%) | 0/171 (0.0%) | 0/171 (0.0%) | 14.5% |
+| `ALWAYS_ON+OFF (α=0.9)` | 171/171 (100.0%) | 171/171 (100.0%) | 171/171 (100.0%) | 171/171 (100.0%) | 100.0% |
+| `Impl L0→L1 (α=0.9)` | 45/63 (71.4%) | 0/63 (0.0%) | 0/63 (0.0%) | 0/63 (0.0%) | 17.9% |
 | `Impl L1→L2 (α=0.9)` | 18/54 (33.3%) | 0/54 (0.0%) | 0/54 (0.0%) | 0/54 (0.0%) | 8.3% |
 | `Impl L2→L3 (α=0.9)` | 36/54 (66.7%) | 0/54 (0.0%) | 0/54 (0.0%) | 0/54 (0.0%) | 16.7% |
-| `none (baseline)` | 66/162 (40.7%) | 0/162 (0.0%) | 0/162 (0.0%) | 0/162 (0.0%) | 10.2% |
+| `none (baseline)` | 66/171 (38.6%) | 0/171 (0.0%) | 0/171 (0.0%) | 0/171 (0.0%) | 9.6% |
 
 #### α = 0.95
 
@@ -4207,6 +4207,51 @@ Reference point: `class_sample[0]`
 | `0.20` | T/o<br><sub>63s</sub> | T/o<br><sub>64s</sub> | N<br><sub>65s</sub> | T/o<br><sub>62s</sub> | N<br><sub>64s</sub> | T/o<br><sub>61s</sub> | T/o<br><sub>66s</sub> | – | T/o<br><sub>62s</sub> | T/o<br><sub>61s</sub> | 0/9 (0%) |
 
 #### Per-Layer
+
+##### ALWAYS_OFF (α=0.9) (L01) — Y=36/36 (100.0%)
+
+| ε | →0 | →1 | →2 | →3 | →4 | →5 | →6 | →7 | →8 | →9 | Y/total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `0.02` | Y<br><sub>1.2s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.9s</sub> | – | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | 9/9 (100%) |
+| `0.05` | Y<br><sub>1.3s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.9s</sub> | – | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | 9/9 (100%) |
+| `0.10` | Y<br><sub>1.2s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.9s</sub> | – | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | 9/9 (100%) |
+| `0.20` | Y<br><sub>1.2s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | Y<br><sub>0.9s</sub> | – | Y<br><sub>0.8s</sub> | Y<br><sub>0.8s</sub> | 9/9 (100%) |
+
+##### ALWAYS_ON (α=0.9) (L01) — Y=9/36 (25.0%)
+
+| ε | →0 | →1 | →2 | →3 | →4 | →5 | →6 | →7 | →8 | →9 | Y/total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `0.02` | Y<br><sub>26s</sub> | Y<br><sub>3.9s</sub> | Y<br><sub>15s</sub> | Y<br><sub>9.2s</sub> | Y<br><sub>9.3s</sub> | Y<br><sub>26s</sub> | Y<br><sub>9.3s</sub> | – | Y<br><sub>12s</sub> | Y<br><sub>23s</sub> | 9/9 (100%) |
+| `0.05` | T/o<br><sub>70s</sub> | T/o<br><sub>73s</sub> | T/o<br><sub>65s</sub> | T/o<br><sub>68s</sub> | T/o<br><sub>66s</sub> | T/o<br><sub>63s</sub> | T/o<br><sub>153s</sub> | – | T/o<br><sub>67s</sub> | T/o<br><sub>63s</sub> | 0/9 (0%) |
+| `0.10` | T/o<br><sub>69s</sub> | T/o<br><sub>69s</sub> | T/o<br><sub>72s</sub> | T/o<br><sub>67s</sub> | T/o<br><sub>66s</sub> | T/o<br><sub>82s</sub> | T/o<br><sub>66s</sub> | – | T/o<br><sub>72s</sub> | T/o<br><sub>76s</sub> | 0/9 (0%) |
+| `0.20` | T/o<br><sub>76s</sub> | T/o<br><sub>147270s</sub> | T/o<br><sub>65s</sub> | T/o<br><sub>66s</sub> | T/o<br><sub>63s</sub> | T/o<br><sub>78s</sub> | T/o<br><sub>61s</sub> | – | T/o<br><sub>67s</sub> | T/o<br><sub>60s</sub> | 0/9 (0%) |
+
+##### ALWAYS_ON+OFF (α=0.9) (L01) — Y=36/36 (100.0%)
+
+| ε | →0 | →1 | →2 | →3 | →4 | →5 | →6 | →7 | →8 | →9 | Y/total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `0.02` | Y<br><sub>1.1s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | – | Y<br><sub>0.7s</sub> | Y<br><sub>0.7s</sub> | 9/9 (100%) |
+| `0.05` | Y<br><sub>1.1s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | – | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | 9/9 (100%) |
+| `0.10` | Y<br><sub>1.0s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | – | Y<br><sub>0.7s</sub> | Y<br><sub>0.7s</sub> | 9/9 (100%) |
+| `0.20` | Y<br><sub>1.0s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.7s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | Y<br><sub>0.8s</sub> | – | Y<br><sub>0.6s</sub> | Y<br><sub>0.6s</sub> | 9/9 (100%) |
+
+##### Impl L0→L1 (α=0.9) (L01) — Y=9/36 (25.0%)
+
+| ε | →0 | →1 | →2 | →3 | →4 | →5 | →6 | →7 | →8 | →9 | Y/total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `0.02` | Y<br><sub>14s</sub> | Y<br><sub>19s</sub> | Y<br><sub>18s</sub> | Y<br><sub>18s</sub> | Y<br><sub>18s</sub> | Y<br><sub>18s</sub> | Y<br><sub>18s</sub> | – | Y<br><sub>19s</sub> | Y<br><sub>18s</sub> | 9/9 (100%) |
+| `0.05` | T/o<br><sub>66s</sub> | T/o<br><sub>67s</sub> | T/o<br><sub>67s</sub> | T/o<br><sub>67s</sub> | T/o<br><sub>68s</sub> | T/o<br><sub>67s</sub> | T/o<br><sub>67s</sub> | – | T/o<br><sub>67s</sub> | T/o<br><sub>67s</sub> | 0/9 (0%) |
+| `0.10` | T/o<br><sub>103s</sub> | T/o<br><sub>86s</sub> | T/o<br><sub>106s</sub> | T/o<br><sub>118s</sub> | T/o<br><sub>94s</sub> | T/o<br><sub>120s</sub> | T/o<br><sub>92s</sub> | – | T/o<br><sub>108s</sub> | T/o<br><sub>103s</sub> | 0/9 (0%) |
+| `0.20` | T/o<br><sub>117s</sub> | T/o<br><sub>120s</sub> | T/o<br><sub>110s</sub> | T/o<br><sub>114s</sub> | T/o<br><sub>147s</sub> | T/o<br><sub>123s</sub> | T/o<br><sub>132s</sub> | – | T/o<br><sub>114s</sub> | T/o<br><sub>119s</sub> | 0/9 (0%) |
+
+##### none (baseline) (L01) — Y=0/36 (0.0%)
+
+| ε | →0 | →1 | →2 | →3 | →4 | →5 | →6 | →7 | →8 | →9 | Y/total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `0.02` | T/o<br><sub>75s</sub> | T/o<br><sub>74s</sub> | T/o<br><sub>84s</sub> | T/o<br><sub>74s</sub> | T/o<br><sub>75s</sub> | T/o<br><sub>109s</sub> | T/o<br><sub>72s</sub> | – | T/o<br><sub>78s</sub> | T/o<br><sub>107s</sub> | 0/9 (0%) |
+| `0.05` | T/o<br><sub>62s</sub> | T/o<br><sub>77s</sub> | T/o<br><sub>76s</sub> | T/o<br><sub>65s</sub> | T/o<br><sub>68s</sub> | T/o<br><sub>65s</sub> | T/o<br><sub>92s</sub> | – | T/o<br><sub>63s</sub> | T/o<br><sub>70s</sub> | 0/9 (0%) |
+| `0.10` | N<br><sub>45s</sub> | T/o<br><sub>68s</sub> | N<br><sub>42s</sub> | N<br><sub>41s</sub> | T/o<br><sub>112s</sub> | N<br><sub>40s</sub> | N<br><sub>46s</sub> | – | T/o<br><sub>89s</sub> | T/o<br><sub>95s</sub> | 0/9 (0%) |
+| `0.20` | N<br><sub>64s</sub> | N<br><sub>37s</sub> | N<br><sub>34s</sub> | N<br><sub>34s</sub> | N<br><sub>34s</sub> | N<br><sub>34s</sub> | N<br><sub>57s</sub> | – | N<br><sub>34s</sub> | N<br><sub>37s</sub> | 0/9 (0%) |
 
 ##### ALWAYS_OFF (α=0.95) (L01) — Y=36/36 (100.0%)
 
