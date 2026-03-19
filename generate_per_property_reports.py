@@ -28,6 +28,7 @@ EXP_RE = re.compile(
 NUM_CLASSES = 5
 EPSILONS = [0.02, 0.05, 0.10, 0.20]
 ALPHAS = [0.90, 0.95, 0.99]
+VALID_RESULTS = {"Y", "N", "T/o"}
 
 
 def load_all_data():
@@ -84,6 +85,168 @@ def fmt_cell(result, time_s):
         return f"🔴 N<br><sub>{t}s</sub>"
 
 
+def valid_rows(df):
+    """Keep only rows that correspond to actual verification queries."""
+    return df[df["result"].isin(VALID_RESULTS)].copy()
+
+
+def dedupe_layer_queries(df):
+    """
+    Collapse repeated per-layer runs of the same query.
+
+    Per-layer experiments rerun unary/baseline tables once per layer-pair
+    directory, so the raw CSV union contains 5 copies of the same query row.
+    The dedupe key intentionally ignores layer_pair so counts reflect unique
+    verification queries rather than repeated executions.
+    """
+    if df.empty:
+        return df.copy()
+
+    key_cols = [
+        c for c in [
+            "model",
+            "prop",
+            "alpha",
+            "epsilon",
+            "true_class",
+            "target_label",
+            "table",
+            "center_source",
+        ]
+        if c in df.columns
+    ]
+    sort_cols = [c for c in ["table", "prop", "epsilon", "true_class", "target_label", "layer_pair", "time_s"] if c in df.columns]
+    return df.sort_values(sort_cols).drop_duplicates(subset=key_cols, keep="first").copy()
+
+
+def layer_shared_tables(df):
+    """Return tables that appear in more than one layer-pair directory."""
+    if df.empty or "layer_pair" not in df.columns:
+        return []
+    counts = df.groupby("table")["layer_pair"].nunique()
+    return sorted(counts[counts > 1].index.tolist())
+
+
+def build_query_blueprint(model_data):
+    """
+    Build one unique row per verification query for denominator accounting.
+
+    Query identity ignores alpha/layer/experiment repetition and keeps only:
+    (property, epsilon, true_class, target_label != true_class).
+    """
+    preferred = model_data[model_data["exp_type"] == "A_full_rule"].copy()
+    if preferred.empty:
+        preferred = model_data.copy()
+
+    query_cols = [c for c in ["model", "prop", "epsilon", "true_class", "target_label", "center_source"] if c in preferred.columns]
+    sort_cols = [c for c in ["prop", "epsilon", "true_class", "target_label"] if c in preferred.columns]
+    deduped = preferred.sort_values(sort_cols).drop_duplicates(subset=query_cols, keep="first").copy()
+    return valid_rows(deduped)
+
+
+def format_query_count_map(counts_by_eps):
+    """Render per-epsilon counts compactly."""
+    if not counts_by_eps:
+        return "0"
+    values = list(counts_by_eps.values())
+    if len(set(values)) == 1:
+        return str(values[0])
+    return ", ".join(f"ε={eps:.2f}: {counts_by_eps[eps]}" for eps in sorted(counts_by_eps))
+
+
+def render_query_accounting(lines, query_blueprint):
+    """Append a concise explanation of where denominators come from."""
+    lines.append("## How To Read Counts")
+    lines.append("")
+    lines.append("- Each `Y/N/T/o` row is one verification query: `(property, ε, true_class, target_label != true_class, rule)`.")
+    lines.append("- Self-target rows (`target_label == true_class`) are stored as `-` in the CSVs and are excluded from every denominator.")
+    lines.append("- Denominators in the summary tables count valid queries, not properties, models, or experiment directories.")
+    lines.append("- For the end-to-end pipeline and a worked example of counts such as `8/40`, see [`COUNTS_AND_PIPELINE.md`](COUNTS_AND_PIPELINE.md).")
+    lines.append("")
+
+    if query_blueprint.empty:
+        return
+
+    lines.append("**Per-model query accounting (the source of denominators such as `8/40`)**")
+    lines.append("")
+    lines.append("| Property | True class(es) | Valid queries per ε | Formula |")
+    lines.append("|----------|----------------|---------------------|---------|")
+
+    total_per_eps = defaultdict(int)
+    formula_parts = []
+    for prop_id in sorted(query_blueprint["prop"].dropna().unique()):
+        prop_df = query_blueprint[query_blueprint["prop"] == prop_id]
+        true_classes = sorted(int(c) for c in prop_df["true_class"].dropna().unique())
+        counts_by_eps = {
+            float(eps): int(len(prop_df[abs(prop_df["epsilon"] - eps) < 1e-6]))
+            for eps in sorted(prop_df["epsilon"].dropna().unique())
+        }
+        for eps, count in counts_by_eps.items():
+            total_per_eps[eps] += count
+
+        ref_eps = sorted(counts_by_eps)[0]
+        ref_df = prop_df[abs(prop_df["epsilon"] - ref_eps) < 1e-6]
+        targets_per_class = sorted(int(ref_df[ref_df["true_class"] == tc]["target_label"].nunique()) for tc in true_classes)
+        if len(set(targets_per_class)) == 1:
+            formula = f"{len(true_classes)} true classes × {targets_per_class[0]} non-self targets"
+        else:
+            formula = " + ".join(str(v) for v in targets_per_class)
+        lines.append(
+            f"| prop{int(prop_id)} | {', '.join(str(tc) for tc in true_classes)} | "
+            f"{format_query_count_map(counts_by_eps)} | {formula} |"
+        )
+        formula_parts.append(str(counts_by_eps[ref_eps]))
+
+    total_desc = format_query_count_map(dict(sorted(total_per_eps.items())))
+    if formula_parts:
+        lines.append(f"| **Total** | – | **{total_desc}** | **{' + '.join(formula_parts)}** |")
+    lines.append("")
+
+
+def prop_query_summary(query_blueprint, prop_id):
+    """Return a one-line denominator explanation for a specific property."""
+    prop_df = query_blueprint[query_blueprint["prop"] == prop_id]
+    if prop_df.empty:
+        return None
+
+    counts_by_eps = {
+        float(eps): int(len(prop_df[abs(prop_df["epsilon"] - eps) < 1e-6]))
+        for eps in sorted(prop_df["epsilon"].dropna().unique())
+    }
+    true_classes = sorted(int(c) for c in prop_df["true_class"].dropna().unique())
+    ref_eps = sorted(counts_by_eps)[0]
+    ref_df = prop_df[abs(prop_df["epsilon"] - ref_eps) < 1e-6]
+    targets_per_class = sorted(int(ref_df[ref_df["true_class"] == tc]["target_label"].nunique()) for tc in true_classes)
+
+    if len(set(targets_per_class)) == 1:
+        formula = f"{len(true_classes)} true classes × {targets_per_class[0]} non-self targets"
+    else:
+        formula = " + ".join(str(v) for v in targets_per_class)
+
+    return f"Valid queries per ε: {format_query_count_map(counts_by_eps)} ({formula})"
+
+
+def append_table_details(lines, section_df, tables_in_section, layer_pair=None):
+    """Append rule tables grouped by true class."""
+    for tbl_name in tables_in_section:
+        tdf = section_df[section_df["table"] == tbl_name]
+        for tc in sorted(tdf["true_class"].dropna().unique()):
+            tc = int(tc)
+            cdf = tdf[tdf["true_class"] == tc]
+            ver_cdf = valid_rows(cdf)
+            ny = (ver_cdf["result"] == "Y").sum()
+            nt = len(ver_cdf)
+            pct = f"{ny/nt*100:.1f}%" if nt > 0 else "–"
+
+            if layer_pair is not None:
+                lines.append(f"##### {tbl_name} ({layer_pair}, class {tc}) — Y={ny}/{nt} ({pct})")
+            else:
+                lines.append(f"##### {tbl_name} (class {tc}) — Y={ny}/{nt} ({pct})")
+            lines.append("")
+            lines.append(build_detail_table(cdf, tc))
+            lines.append("")
+
+
 def build_detail_table(df_rule, true_class):
     """Build a per-class detail table for a single rule type and true class."""
     lines = []
@@ -127,6 +290,7 @@ def generate_model_report(model_key, model_data, all_data):
 
     props = sorted(model_data["prop"].unique())
     exp_types_present = sorted(model_data["exp_type"].unique())
+    query_blueprint = build_query_blueprint(model_data)
 
     lines = []
     lines.append(f"# Model Report: {model_name} (Per-Property)")
@@ -139,9 +303,10 @@ def generate_model_report(model_key, model_data, all_data):
     lines.append(f"**Properties covered:** {', '.join(f'prop{p}' for p in props)} ({len(props)} total)  ")
     lines.append(f"**Experiment types:** {', '.join(et.replace('A_', '').replace('B_', '').replace('C_', '') for et in exp_types_present)}")
     lines.append("")
+    render_query_accounting(lines, query_blueprint)
 
     # ── Aggregated summary ────────────────────────────────────────────────
-    ver = model_data[model_data["result"].isin(["Y", "N", "T/o"])]
+    ver = valid_rows(model_data)
 
     lines.append("---")
     lines.append("")
@@ -155,19 +320,23 @@ def generate_model_report(model_key, model_data, all_data):
 
         lines.append(f"### {exp_label}")
         lines.append("")
+        if exp_key == "B_per_layer":
+            lines.append("_Per-layer unary/baseline rows are deduplicated across the 5 layer-pair directories, so denominators reflect unique queries rather than repeated reruns._")
+            lines.append("")
 
         for alpha in ALPHAS:
             adf = exp_df[abs(exp_df["alpha"] - alpha) < 1e-6]
             if len(adf) == 0:
                 continue
+            summary_df = dedupe_layer_queries(adf) if exp_key == "B_per_layer" else adf
 
             lines.append(f"#### α = {alpha}")
             lines.append("")
             lines.append("| Rule | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 | Total Y% |")
             lines.append("|------|--------|--------|--------|--------|----------|")
 
-            for tbl in sorted(adf["table"].unique()):
-                tdf = adf[adf["table"] == tbl]
+            for tbl in sorted(summary_df["table"].unique()):
+                tdf = summary_df[summary_df["table"] == tbl]
                 cells = []
                 total_y = 0
                 total_n = 0
@@ -192,17 +361,20 @@ def generate_model_report(model_key, model_data, all_data):
 
     for prop_id in props:
         prop_data = model_data[model_data["prop"] == prop_id]
-        prop_ver = prop_data[prop_data["result"].isin(["Y", "N", "T/o"])]
+        prop_ver = valid_rows(prop_data)
         true_classes = sorted(prop_data[prop_data["result"] != "-"]["true_class"].dropna().unique())
 
         lines.append(f"### Property {prop_id}")
         lines.append("")
         if "center_source" in prop_data.columns:
             cs = prop_data["center_source"].dropna().unique()
-            if len(cs) > 0:
-                lines.append(f"Reference point: `{cs[0]}`  ")
+        if len(cs) > 0:
+            lines.append(f"Reference point: `{cs[0]}`  ")
         if true_classes:
             lines.append(f"True class(es): {', '.join(str(int(c)) for c in true_classes)}")
+        summary = prop_query_summary(query_blueprint, prop_id)
+        if summary:
+            lines.append(f"{summary}  ")
         lines.append("")
 
         # Full-rule experiments for this property
@@ -213,46 +385,36 @@ def generate_model_report(model_key, model_data, all_data):
 
             lines.append(f"#### {exp_label}")
             lines.append("")
+            if exp_key == "B_per_layer":
+                lines.append("_Shared unary/baseline tables are shown once below using deduplicated query rows. Layer-specific implication tables remain grouped by layer pair._")
+                lines.append("")
 
             for alpha in ALPHAS:
                 adf = exp_df[abs(exp_df["alpha"] - alpha) < 1e-6]
                 if len(adf) == 0:
                     continue
 
+                lines.append(f"##### α={alpha}")
+                lines.append("")
+
                 if exp_key == "B_per_layer":
-                    layer_pairs = sorted(adf["layer_pair"].unique())
-                    tag = f"α={alpha}"
-                else:
-                    layer_pairs = [None]
-                    tag = f"α={alpha}"
+                    shared_tables = layer_shared_tables(adf)
+                    if shared_tables:
+                        lines.append("**Shared across layer-pair runs (deduplicated)**")
+                        lines.append("")
+                        shared_df = dedupe_layer_queries(adf[adf["table"].isin(shared_tables)])
+                        append_table_details(lines, shared_df, shared_tables)
 
-                for lp in layer_pairs:
-                    if lp is not None:
+                    for lp in sorted(adf["layer_pair"].unique()):
                         lpdf = adf[adf["layer_pair"] == lp]
-                        section_label = f"α={alpha}, {lp}"
-                    else:
-                        lpdf = adf
-                        section_label = f"α={alpha}"
-
-                    tables_in_section = sorted(lpdf["table"].unique())
-
-                    for tbl_name in tables_in_section:
-                        tdf = lpdf[lpdf["table"] == tbl_name]
-                        for tc in sorted(tdf["true_class"].dropna().unique()):
-                            tc = int(tc)
-                            cdf = tdf[tdf["true_class"] == tc]
-                            ver_cdf = cdf[cdf["result"].isin(["Y", "N", "T/o"])]
-                            ny = (ver_cdf["result"] == "Y").sum()
-                            nt = len(ver_cdf)
-                            pct = f"{ny/nt*100:.1f}%" if nt > 0 else "–"
-
-                            if lp is not None:
-                                lines.append(f"##### {tbl_name} ({lp}, class {tc}) — Y={ny}/{nt} ({pct})")
-                            else:
-                                lines.append(f"##### {tbl_name} (class {tc}) — Y={ny}/{nt} ({pct})")
-                            lines.append("")
-                            lines.append(build_detail_table(cdf, tc))
-                            lines.append("")
+                        tables_in_section = [tbl for tbl in sorted(lpdf["table"].unique()) if tbl not in shared_tables]
+                        if not tables_in_section:
+                            continue
+                        lines.append(f"**Layer pair {lp}**")
+                        lines.append("")
+                        append_table_details(lines, lpdf, tables_in_section, layer_pair=lp)
+                else:
+                    append_table_details(lines, adf, sorted(adf["table"].unique()))
 
     return "\n".join(lines)
 
@@ -429,8 +591,16 @@ def generate_readme(data, model_keys):
     lines.append("| Reference point | Random training sample | **Property midpoint** |")
     lines.append("| Rule mining | Per-model (shared across properties) | **Per-property** |")
     lines.append("| Rule cap | max_rules=3000, max_unary=3000 | **No limit** (all rules used) |")
-    lines.append("| Granularity | 1 sample per model | **1 sample per (model, property) pair** |")
+    lines.append("| Granularity | 1 sample per model | **1 reference point per (model, property) pair, expanded into query rows over true_class/target_label pairs** |")
     lines.append("| Total pairs | 45 models | **186 (model, property) pairs** |")
+    lines.append("")
+    lines.append("## How to read `Y/total`")
+    lines.append("")
+    lines.append("- `Y/total` always means `verified queries / valid queries`.")
+    lines.append("- A valid query is one `(property, ε, true_class, target_label != true_class, rule)` combination.")
+    lines.append("- Rows with `target_label == true_class` are stored as `-` in the CSVs and are excluded from denominators.")
+    lines.append("- In per-layer reports, shared unary/baseline rows are deduplicated across layer-pair directories so counts reflect unique queries rather than 5 reruns of the same query.")
+    lines.append("- For the full pipeline and a worked example of counts such as `8/40`, see **[COUNTS_AND_PIPELINE.md](COUNTS_AND_PIPELINE.md)**.")
     lines.append("")
     lines.append("## Experiment Types")
     lines.append("")

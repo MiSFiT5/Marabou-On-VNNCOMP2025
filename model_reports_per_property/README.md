@@ -1,6 +1,6 @@
 # ACAS Xu Per-Property Verification Reports
 
-> Generated 2026-03-17
+> Generated 2026-03-19
 
 ## What's different from `model_reports/`
 
@@ -9,8 +9,16 @@
 | Reference point | Random training sample | **Property midpoint** |
 | Rule mining | Per-model (shared across properties) | **Per-property** |
 | Rule cap | max_rules=3000, max_unary=3000 | **No limit** (all rules used) |
-| Granularity | 1 sample per model | **1 sample per (model, property) pair** |
+| Granularity | 1 sample per model | **1 reference point per (model, property) pair, expanded into query rows over true_class/target_label pairs** |
 | Total pairs | 45 models | **186 (model, property) pairs** |
+
+## How to read `Y/total`
+
+- `Y/total` always means `verified queries / valid queries`.
+- A valid query is one `(property, ε, true_class, target_label != true_class, rule)` combination.
+- Rows with `target_label == true_class` are stored as `-` in the CSVs and are excluded from denominators.
+- In per-layer reports, shared unary/baseline rows are deduplicated across layer-pair directories so counts reflect unique queries rather than 5 reruns of the same query.
+- For the full pipeline and a worked example of counts such as `8/40`, see **[COUNTS_AND_PIPELINE.md](COUNTS_AND_PIPELINE.md)**.
 
 ## Experiment Types
 
@@ -73,43 +81,3 @@
 | N5,7 | [N5_7.md](N5_7.md) |
 | N5,8 | [N5_8.md](N5_8.md) |
 | N5,9 | [N5_9.md](N5_9.md) |
-
-### Analysis
-
-See [All_Models_Aggregated.md](All_Models_Aggregated.md) for full tables.
-
-**Baseline is near-zero.** Without NAP rules, Marabou verifies only 4.0% of queries at ε=0.02 and 0% at ε≥0.10 on property midpoints.
-
-**NAP dramatically improves verification.** With the best rule type per (model, prop) pair at α=0.90:
-
-| ε | Baseline | NAP (any rule Y) |
-|---|----------|-------------------|
-| 0.02 | 4.0% | **51.9%** |
-| 0.05 | 1.2% | **44.3%** |
-| 0.10 | 0.0% | **17.8%** |
-| 0.20 | 0.0% | **9.7%** |
-
-**6,348 "rescue" cases:** Baseline returns N or T/o, but NAP verifies successfully.
-
-**712x average speedup** on the 223 cases where both baseline and NAP verify (18.6s → 0.07s).
-
-**Best rule types (ε=0.02, α=0.90):**
-
-| Rule Type | Y% (ε=0.02) |
-|-----------|-------------|
-| ALWAYS_ON+OFF | 37.3% |
-| ALWAYS_OFF | 34.3% |
-| Impl L3→L4 | 29.2% |
-| Impl L2→L3 | 29.1% |
-| ALWAYS_ON | 23.6% |
-| Impl L1→L2 | 23.5% |
-| Impl L4→L5 | 20.1% |
-| Impl L0→L1 | 17.3% |
-
-Unary rules (ALWAYS_ON/OFF) are the most effective. Among implication rules, middle layers (L2→L3, L3→L4) outperform early (L0→L1) and late (L4→L5) layers.
-
-**Implication ablation (Exp C):** Each implication direction (A→B, !A→!B, A→!B, !A→B) was tested separately. At α=0.90, the strongest directions are !A→!B and A→!B; A→B and !A→B are weaker. At α≥0.95, implication rules become much less effective across all directions.
-
-**Lower α → more rules → higher verification rate:** α=0.90 (51.9%) > α=0.95 (50.8%) > α=0.99 (28.0%) at ε=0.02.
-
-**Model variation:** N1,x series performs best (35–45% at ε=0.02), while N4,x/N5,x are harder (6–25%).

@@ -1,6 +1,6 @@
 # ACAS Xu Per-Property — Aggregated Results
 
-> Generated 2026-03-17  
+> Generated 2026-03-19  
 > Experiments: property midpoint reference, no rule cap (v2)
 
 - **Total CSV rows:** 1,217,220
