@@ -80,167 +80,79 @@ Parameters:
 
 ## Results
 
-Y(Yes): The sample is found to have NO counterexample.(UNSAT)
-N(No): The sample is found to have counterexample.(SAT)
-T(Timeout): The rule is not verified due to timeout.
+- `Y`: no counterexample found for that query (`UNSAT`).
+- `N`: a counterexample was found (`SAT`).
+- `T/o`: the query hit the timeout.
 
-Detailed Results now can be found in the `model_reports` directory.
+### Report Families
 
-### Per-Property Reports (NEW)
-
-A second set of reports is available in [`model_reports_per_property/`](./model_reports_per_property/README.md), with three key differences from the original `model_reports/`:
-
-| Aspect | `model_reports/` | `model_reports_per_property/` |
-|--------|-----------------|------------------------------|
-| Reference point | Random training sample | Property midpoint |
-| Rule mining | Per-model (shared across properties) | Per-property |
-| Rule cap | max_rules=3000, max_unary=3000 | No limit (all rules) |
-
-See the [per-property aggregated report](./model_reports_per_property/All_Models_Aggregated.md) for headline numbers.
-
-### MNIST Reports (NEW)
-
-MNIST verification reports are available in [`mnist_reports/`](./mnist_reports/README.md), covering three fully-connected ReLU models of increasing depth:
-
-| Model | Architecture | Best NAP Y% (ε=0.02, α=0.90) |
-|-------|-------------|-------------------------------|
-| mnist256x2 | 784→256→256→10 | **99.7%** |
-| mnist256x4 | 784→(256)×4→10 | **72.2%** |
-| mnist256x6 | 784→(256)×6→10 | **57.5%** |
-
-See the [MNIST aggregated report](./mnist_reports/All_Models_Aggregated.md) for full results.
-
-### Random-Init MNIST Reports (NEW)
-
-A companion random-initialization study is available in
-[`random_init_mnist_reports/`](./random_init_mnist_reports/README.md). It
-reuses the same VNN-COMP MNIST models, reinitializes them with standard weight
-initialization schemes, keeps only `correct-by-luck` samples, and then runs
-baseline-only Marabou verification at `epsilon=0.05`.
-
-| Model | Random accuracy | Eligible classes | Y | N | T/o |
-|-------|------------------|------------------|---|---|-----|
-| mnist256x4 | 2832/60000 (4.72%) | 6/10 | 0 | 73 | 89 |
-| mnist256x6 | 6291/60000 (10.49%) | 6/10 | 0 | 0 | 162 |
-
-Important caveat: for each model, the `he/xavier/lecun` variants produced
-identical predictions in this exact zero-bias ReLU setup, so this should be
-read as a numeric-scale ablation rather than three independent random
-classifiers.
-
-See the [random-init aggregated report](./random_init_mnist_reports/All_Models_Aggregated.md)
-for the full analysis and the comparison to the trained
-[`mnist_reports/`](./mnist_reports/README.md).
-
-
-### RQ2: NAP Volume Estimation (NEW)
-
-A separate experiment estimates how large the NAP region is in the full input
-space \([0,1]^{784}\) using two independent methods on `mnist256x4` (alpha=0.95):
-
-| Method | Classes | Total Samples | NAP Hits | Conclusion |
-|--------|---------|--------------|----------|------------|
-| Box Sandwich (IBP + MC) | 10/10 | 2,000,000 | 0 | Volume ≈ 0 |
-| Beta Mixture IS | 8/10 | 4,000,000 | 0 | Volume ≈ 0 |
-
-Both methods confirm that the NAP region occupies an effectively zero fraction
-of the uniform input hypercube—a direct consequence of the curse of
-dimensionality (784D input, ~20D data manifold).
-
-See the [full RQ2 report](./rq2_box_sandwich_reports/README.md) for methodology
-details, per-class results, and analysis.
+- [`model_reports/`](./model_reports/README.md) — legacy sample-based ACAS/CIFAR reports. One reference sample per model, rule cap `max_rules=3000`, `max_unary=3000`.
+- [`model_reports_per_property/`](./model_reports_per_property/README.md) — per-property ACAS reports. Property midpoint reference, no rule cap, deduplicated baseline counts.
+- [`mnist_reports/`](./mnist_reports/README.md) — per-class MNIST reports with both deduplicated-query and row-level summaries.
+- [`random_init_mnist_reports/`](./random_init_mnist_reports/README.md) — random-init MNIST baseline-only study.
+- [`rq2_box_sandwich_reports/`](./rq2_box_sandwich_reports/README.md) — RQ2 volume-estimation study.
+- [`The RQ1 problems .md`](./The%20RQ1%20problems%20.md) — RQ1 sample-generation notes and visualizations.
 
 ### Experiment Types
 
 | Label | Meaning |
 |-------|---------|
 | `full-rule` | All rule types mined from all layers combined. |
-| `layer_L0L1` … `layer_L4L5` | Per-layer-pair rule verification (ablation by layer pair). |
+| `layer_L0L1` … `layer_L4L5` | Per-layer-pair rule verification (new per-rule format). |
+| `layer_old_L0L1` … `layer_old_L4L5` | Legacy Row1/3 layer-ablation format used only in the old sample-based reports. |
 | `impl_ablation` | Implication directions tested separately (`A->B`, `A->!B`, `!A->B`, `!A->!B`). |
 
-# Model Reports Index
+### Random-Init MNIST Reports
 
-Auto-generated per-model verification reports.
+A companion random-initialization study is available in [`random_init_mnist_reports/`](./random_init_mnist_reports/README.md). It reuses the same VNN-COMP MNIST models, reinitializes them with standard weight initialization schemes, keeps only `correct-by-luck` samples, and then runs baseline-only Marabou verification at `epsilon=0.05`.
 
-| Model | Experiments | Struct |
-|-------|-------------|--------|
-| [N1,1](./N1_1.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,2](./N1_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,3](./N1_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,4](./N1_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,5](./N1_5.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,6](./N1_6.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,7](./N1_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,8](./N1_8.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N1,9](./N1_9.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,1](./N2_1.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,2](./N2_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,3](./N2_3.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,4](./N2_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,5](./N2_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,6](./N2_6.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,7](./N2_7.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,8](./N2_8.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N2,9](./N2_9.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,1](./N3_1.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,2](./N3_2.md) | full-rule, impl_ablation, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,3](./N3_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,4](./N3_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,5](./N3_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,6](./N3_6.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,7](./N3_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,8](./N3_8.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N3,9](./N3_9.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,1](./N4_1.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,2](./N4_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,3](./N4_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,4](./N4_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,5](./N4_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,6](./N4_6.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,7](./N4_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,8](./N4_8.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N4,9](./N4_9.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,1](./N5_1.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,2](./N5_2.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,3](./N5_3.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,4](./N5_4.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,5](./N5_5.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,6](./N5_6.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,7](./N5_7.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,8](./N5_8.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [N5,9](./N5_9.md) | full-rule, layer_L0L1, layer_L1L2, layer_L2L3, layer_L3L4, layer_L4L5, layer_old_L0L1, layer_old_L1L2, layer_old_L2L3, layer_old_L3L4, layer_old_L4L5 | ✅ |
-| [cifar_deep_kw](./cifar_deep_kw.md) | full-rule | ❌ |
-| [cifar_wide_kw](./cifar_wide_kw.md) | full-rule | ❌ |
+| Model | Random accuracy | Eligible classes | Y | N | T/o |
+|-------|------------------|------------------|---|---|-----|
+| mnist256x4 | 2832/60000 (4.72%) | 6/10 | 0 | 73 | 89 |
+| mnist256x6 | 6291/60000 (10.49%) | 6/10 | 0 | 0 | 162 |
 
-Additional CIFAR reports:
-- [cifar_deep_kw](./model_reports/cifar_deep_kw.md)
-- [cifar_wide_kw](./model_reports/cifar_wide_kw.md)
+Important caveat: for each model, the `he/xavier/lecun` variants produced identical predictions in this exact zero-bias ReLU setup, so this should be read as a numeric-scale ablation rather than three independent random classifiers.
 
-## Key Insights
+### RQ2: NAP Volume Estimation
 
-1. In ACAS full-rule experiments, baseline (`none`) remains `0/3024` robust queries at all alpha levels.
-2. `3024` is the total ACAS query count per rule and per alpha, aggregated over all 45 reported models (`24×80 + 9×64 + 9×48 + 3×32 = 3024`).
-3. The strongest full-rule family is consistently early-layer implication (`Impl L0→L1`):  
-   `903/3024 (29.9%)` at `alpha=0.90`, `353/3024 (11.7%)` at `alpha=0.95`, and `12/3024 (0.4%)` at `alpha=0.99`.
-4. Implication-type ablation (partial coverage: 11 models at `alpha=0.90`, 5 at `0.95`, 4 at `0.99`) shows:
-   - `alpha=0.90`: `!A->!B` = `379/3280 (11.6%)`, `A->!B` = `330/3280 (10.1%)`, `A->B` = `156/3280 (4.8%)`, `!A->B` = `130/3280 (4.0%)`.
-   - `alpha=0.95`: `A->!B` = `32/1120 (2.9%)`, `!A->!B` = `28/1120 (2.5%)`, `A->B` = `0/1120`, `!A->B` = `0/1120`.
-   - `alpha=0.99`: all four implication types are `0`.
-5. Rule utility is concentrated in early layers: `L0→L1` dominates, while `L4→L5` drops to `2.2%` (`alpha=0.90`), `0.3%` (`0.95`), and `0.0%` (`0.99`).
-6. CIFAR results are very strong in the completed runs: all reported queries are robust (`100% Y`) for `cifar_deep_kw` (`alpha=0.90/0.95/0.99`) and `cifar_wide_kw` (`alpha=0.90/0.95`) with the baseline, they are already robust even just with the baseline.
+A separate experiment estimates how large the NAP region is in the full input space \([0,1]^{784}\) using two independent methods on `mnist256x4` (`alpha=0.95`):
 
+| Method | Classes | Total Samples | NAP Hits | Conclusion |
+|--------|---------|--------------|----------|------------|
+| Box Sandwich (IBP + MC) | 10/10 | 2,000,000 | 0 | Volume ≈ 0 |
+| Beta Mixture IS | 8/10 | 4,000,000 | 0 | Volume ≈ 0 |
 
-## Notes
+Both methods confirm that the NAP region occupies an effectively zero fraction of the uniform input hypercube, which is consistent with the curse of dimensionality (784D input versus an approximately 20D data manifold).
 
-The results now are not completed, what and it will get updated when new results released from the cluster.
+## Key Findings
 
-### Still Running
- Update time: March 18th, 2026
- - MNIST per-layer and impl ablation experiments (partially complete).
- - mnist256x4: 9 full-rule experiments missing (classes 0, 1, 8, 9 at some alpha values).
- - RQ2 Box Sandwich: complete (10/10 classes). Beta IS: 8/10 complete (c0, c5 failed on cluster).
+### Legacy Sample-Based ACAS (`model_reports/`)
 
+- Baseline (`none`) stays `0/3024` row-level verified queries at all alpha values.
+- `3024` is the row-level denominator per rule family and per alpha across the 45 sample-based ACAS reports (`24×80 + 9×64 + 9×48 + 3×32 = 3024`).
+- The strongest full-rule family is `Impl L0→L1`: `903/3024 (29.9%)` at `alpha=0.90`, `353/3024 (11.7%)` at `alpha=0.95`, and `12/3024 (0.4%)` at `alpha=0.99`.
 
-### NEXT
- - RQ2: Try with ACAS Xu, the method may have more meaningful results(with only 5-dimension imput)
- - Random Initialized NN: For 3 initialization methods, they just set the bias to 0 -> also assign values to the bias.
+### ACAS Per-Property (`model_reports_per_property/`)
+
+- Deduplicated baseline is `59/1432 (4.1%)` at `ε=0.02`, `17/1432 (1.2%)` at `ε=0.05`, and `0` at `ε=0.10/0.20`.
+- `Any verified` over unique `(model, property)` pairs is `96/185 (51.9%)` at `α=0.90, ε=0.02`, `94/185 (50.8%)` at `α=0.95, ε=0.02`, and `52/186 (28.0%)` at `α=0.99, ε=0.02`.
+- `N2,9 prop8` is still missing full-rule runs at `α=0.90` and `α=0.95`, which is why the denominator is `185` there instead of `186`.
+
+### MNIST (`mnist_reports/`)
+
+- Deduplicated baseline at `ε=0.02` is `63/90` for `mnist256x2`, `31/72` for `mnist256x4`, and `36/90` for `mnist256x6`.
+- Best full-rule row-level Y% at `ε=0.02, α=0.90` is `99.7%` (`mnist256x2`), `72.2%` (`mnist256x4`), and `57.5%` (`mnist256x6`).
+- `mnist256x4` is still incomplete: classes `1` and `8` are missing in the current results.
+
+### CIFAR (`model_reports/`)
+
+- Completed sample-based runs remain `100% Y` for `cifar_deep_kw` (`alpha=0.90/0.95/0.99`) and `cifar_wide_kw` (`alpha=0.90/0.95`).
+
+## Status
+
+Update time: March 20th, 2026
+
+- These results are still incomplete.
+- `mnist256x4` is missing classes `1` and `8`.
+- ACAS per-property full-rule is missing `N2,9 prop8` at `α=0.90` and `α=0.95`.
+- RQ2 Box Sandwich is complete (10/10 classes). Beta IS is 8/10 complete (`c0` and `c5` failed on the cluster).

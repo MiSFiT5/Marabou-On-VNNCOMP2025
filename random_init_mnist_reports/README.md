@@ -75,6 +75,10 @@ See [All_Models_Aggregated.md](All_Models_Aggregated.md) for full tables.
 
 The closest trained reference already exists in [../mnist_reports/](../mnist_reports/README.md):
 
+- For `mnist256x4`, the detailed trained comparison uses the current `alpha=0.95`
+  full-rule subset, which covers `7` classes (`63` off-target queries). The
+  broader trained directory contains `8` classes with some data overall.
+
 - trained baseline remains weak at `epsilon=0.05`
 - trained full-rule NAP is much stronger than the random baseline study
 - no extra trained rerun is required just to obtain a comparator

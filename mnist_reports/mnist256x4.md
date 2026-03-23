@@ -2,17 +2,35 @@
 
 > **MNIST** — mnist256x4 (4 hidden layers, 256 neurons each)  
 > Per-class experiments, no rule cap  
-> Generated 2026-03-18
+> Generated 2026-03-20
 
 **Model file:** `mnist-net_256x4.onnx`  
 **Architecture:** 784 → 256 → 256 → 256 → 256 → 10  
-**Classes covered:** 0, 2, 3, 4, 5, 6, 7, 9 (8 total)  
+**Classes with at least one experiment:** 0, 2, 3, 4, 5, 6, 7, 9 (8 total)  
+**Missing classes in current results:** 1, 8  
 **Layer pairs:** L01, L12, L23  
 **Experiment types:** full_rule, per_layer, impl_ablation
 
+## How To Read Counts
+
+- `Classes with at least one experiment` means the classes that appear anywhere in the current result directory; missing classes have no report rows yet.
+- `Aggregated Summary` below is row-level: each rule family contributes its own verification rows, so denominators grow with the number of rule families shown.
+- In `Per-Layer`, shared unary / baseline rows are repeated once per layer-pair directory; this section reports those raw reruns because it is a per-experiment summary.
+- `Full-Rule Unique Query Coverage` collapses rule-row duplicates and answers the simpler question: for a `(class, ε, target)` query, did any full-rule NAP rule verify it?
+
+## Full-Rule Unique Query Coverage
+
+At least one NAP rule type achieves `Y` for a given `(class, ε, target)` query.
+
+| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
+|---|--------|--------|--------|--------|
+| 0.90 | 63/63 (100.0%) | 63/63 (100.0%) | 63/63 (100.0%) | 63/63 (100.0%) |
+| 0.95 | 63/63 (100.0%) | 63/63 (100.0%) | 61/63 (96.8%) | 58/63 (92.1%) |
+| 0.99 | 54/63 (85.7%) | 36/63 (57.1%) | 36/63 (57.1%) | 36/63 (57.1%) |
+
 ---
 
-## Aggregated Summary (across all classes)
+## Aggregated Summary (row-level counts across all classes)
 
 ### Full-Rule
 

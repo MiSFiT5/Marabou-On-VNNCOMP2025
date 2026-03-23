@@ -1,6 +1,6 @@
 # ACAS Xu Per-Property — Aggregated Results
 
-> Generated 2026-03-19  
+> Generated 2026-03-20  
 > Experiments: property midpoint reference, no rule cap (v2)
 
 - **Total CSV rows:** 1,217,220
@@ -9,22 +9,32 @@
 - **Unique properties:** [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 - **Unique (model, prop) pairs:** 186
 
-## Baseline (no NAP rules)
+## How To Read Counts
+
+- The baseline table below is deduplicated to one canonical run per unique query `(model, property, ε, true_class, target_label)`.
+- `Any verified` counts unique `(model, property)` pairs at a fixed `α` and `ε`.
+- `Rule Type Breakdown` and `Best row-level Y%` remain row-level statistics across all valid queries for that rule family.
+
+## Baseline (deduplicated unique queries)
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 1180 | 28293 | 203 | 29676 | 4.0% |
-| 0.05 | 363 | 28872 | 441 | 29676 | 1.2% |
-| 0.10 | 0 | 29164 | 512 | 29676 | 0.0% |
-| 0.20 | 0 | 29301 | 375 | 29676 | 0.0% |
+| 0.02 | 59 | 1364 | 9 | 1432 | 4.1% |
+| 0.05 | 17 | 1393 | 22 | 1432 | 1.2% |
+| 0.10 | 0 | 1409 | 23 | 1432 | 0.0% |
+| 0.20 | 0 | 1411 | 21 | 1432 | 0.0% |
 
 ## Full-Rule NAP — best across rule types per (model, prop)
 
 "Any verified" = at least one NAP rule type achieves Y for a given (model, prop, epsilon) pair.
 
+Missing full-rule coverage by α:
+- α=0.90: N2,9 prop8
+- α=0.95: N2,9 prop8
+
 | α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
 |---|--------|--------|--------|--------|
-| 0.9 | 96/185 (51.9%) | 82/185 (44.3%) | 33/185 (17.8%) | 18/185 (9.7%) |
+| 0.90 | 96/185 (51.9%) | 82/185 (44.3%) | 33/185 (17.8%) | 18/185 (9.7%) |
 | 0.95 | 94/185 (50.8%) | 33/185 (17.8%) | 19/185 (10.3%) | 14/185 (7.6%) |
 | 0.99 | 52/186 (28.0%) | 20/186 (10.8%) | 19/186 (10.2%) | 13/186 (7.0%) |
 
@@ -43,18 +53,18 @@
 
 ## Speedup Analysis
 
-- **Both verify Y:** 223 cases
-- **Mean speedup:** 712.9x (median 354.7x)
-- **Mean baseline time:** 18.56s
-- **Mean NAP time:** 0.07s
-- **Baseline fails, NAP verifies:** 6348 cases
-  - From timeout: 157
-  - From falsified: 6191
+- **Both verify Y:** 76 unique queries
+- **Mean speedup:** 675.6x (median 345.8x)
+- **Mean baseline time:** 18.54s
+- **Mean NAP time:** 0.17s
+- **Baseline fails, NAP verifies:** 2121 unique queries
+  - From timeout: 51
+  - From falsified: 2070
 
 ## Per-Model Summary
 
-| Model | Props | Exp A | Exp B | Exp C | Best Y% (ε=0.02, α=0.90) |
-|-------|-------|-------|-------|-------|--------------------------|
+| Model | Props | Full-Rule Groups | Per-Layer Groups | Impl-Ablation Groups | Best Row-Level Y% (ε=0.02, α=0.90) |
+|-------|-------|------------------|------------------|-----------------------|------------------------------------|
 | [N1,1](N1_1.md) | 6 | 18 | 18 | 18 | 17.2% |
 | [N1,2](N1_2.md) | 4 | 12 | 12 | 12 | 44.8% |
 | [N1,3](N1_3.md) | 4 | 12 | 12 | 12 | 43.0% |

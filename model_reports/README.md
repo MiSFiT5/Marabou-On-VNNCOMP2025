@@ -1,6 +1,11 @@
 # Model Reports Index
 
-Auto-generated per-model verification reports.
+Legacy sample-based per-model verification reports.
+
+- Reference point: one training sample per model.
+- Rule cap: `max_rules=3000`, `max_unary=3000`.
+- `layer_old_*` denotes the legacy Row1/3 layer-ablation format.
+- For the newer per-property ACAS reports, see [`../model_reports_per_property/README.md`](../model_reports_per_property/README.md).
 
 | Model | Experiments | Struct |
 |-------|-------------|--------|

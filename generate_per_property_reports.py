@@ -90,6 +90,26 @@ def valid_rows(df):
     return df[df["result"].isin(VALID_RESULTS)].copy()
 
 
+def dedupe_baseline_queries(df, keep_alpha=False):
+    """
+    Collapse repeated baseline executions to one canonical run per unique query.
+
+    Baseline rows are duplicated across alpha directories and, for per-layer /
+    impl-ablation experiments, across multiple experiment folders. For summary
+    statistics we keep one representative run per query and ignore the
+    redundant reruns.
+    """
+    if df.empty:
+        return df.copy()
+
+    key_cols = [c for c in ["model", "prop", "epsilon", "true_class", "target_label"] if c in df.columns]
+    if keep_alpha and "alpha" in df.columns:
+        key_cols.append("alpha")
+
+    sort_cols = [c for c in ["model", "prop", "epsilon", "true_class", "target_label", "exp_type", "alpha", "layer_pair", "time_s"] if c in df.columns]
+    return df.sort_values(sort_cols).drop_duplicates(subset=key_cols, keep="first").copy()
+
+
 def dedupe_layer_queries(df):
     """
     Collapse repeated per-layer runs of the same query.
@@ -424,6 +444,7 @@ def generate_aggregated_report(data):
     ver = data[data["result"].isin(["Y", "N", "T/o"])]
     bl = ver[ver["table"].str.contains("baseline", case=False, na=False)]
     nap = ver[~ver["table"].str.contains("baseline", case=False, na=False)]
+    bl_unique = dedupe_baseline_queries(bl)
 
     lines = []
     lines.append("# ACAS Xu Per-Property — Aggregated Results")
@@ -438,13 +459,20 @@ def generate_aggregated_report(data):
     lines.append(f"- **Unique (model, prop) pairs:** {data.groupby(['model', 'prop']).ngroups}")
     lines.append("")
 
+    lines.append("## How To Read Counts")
+    lines.append("")
+    lines.append("- The baseline table below is deduplicated to one canonical run per unique query `(model, property, ε, true_class, target_label)`.")
+    lines.append("- `Any verified` counts unique `(model, property)` pairs at a fixed `α` and `ε`.")
+    lines.append("- `Rule Type Breakdown` and `Best row-level Y%` remain row-level statistics across all valid queries for that rule family.")
+    lines.append("")
+
     # ── Baseline ──────────────────────────────────────────────────────────
-    lines.append("## Baseline (no NAP rules)")
+    lines.append("## Baseline (deduplicated unique queries)")
     lines.append("")
     lines.append("| ε | Y | N | T/o | Total | Verified % |")
     lines.append("|---|---|---|-----|-------|-----------|")
     for eps in EPSILONS:
-        edf = bl[abs(bl["epsilon"] - eps) < 1e-6]
+        edf = bl_unique[abs(bl_unique["epsilon"] - eps) < 1e-6]
         n = len(edf)
         ny = (edf["result"] == "Y").sum()
         nn = (edf["result"] == "N").sum()
@@ -461,6 +489,20 @@ def generate_aggregated_report(data):
     lines.append("## Full-Rule NAP — best across rule types per (model, prop)")
     lines.append("")
     lines.append("\"Any verified\" = at least one NAP rule type achieves Y for a given (model, prop, epsilon) pair.")
+    all_pairs = set(tuple(x) for x in nap_a[["model", "prop"]].drop_duplicates().to_records(index=False))
+    missing_by_alpha = {}
+    for alpha in ALPHAS:
+        adf = nap_a[abs(nap_a["alpha"] - alpha) < 1e-6]
+        present_pairs = set(tuple(x) for x in adf[["model", "prop"]].drop_duplicates().to_records(index=False))
+        missing_pairs = sorted(all_pairs - present_pairs)
+        if missing_pairs:
+            labels = [f"N{model.split('_')[0]},{model.split('_')[1]} prop{int(prop)}" for model, prop in missing_pairs]
+            missing_by_alpha[alpha] = labels
+    if missing_by_alpha:
+        lines.append("")
+        lines.append("Missing full-rule coverage by α:")
+        for alpha, labels in missing_by_alpha.items():
+            lines.append(f"- α={alpha:.2f}: {', '.join(labels)}")
     lines.append("")
     lines.append("| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |")
     lines.append("|---|--------|--------|--------|--------|")
@@ -476,7 +518,7 @@ def generate_aggregated_report(data):
             ny = best.sum()
             pct = f"{ny/n*100:.1f}%" if n > 0 else "–"
             cells.append(f"{ny}/{n} ({pct})")
-        lines.append(f"| {alpha} | {' | '.join(cells)} |")
+        lines.append(f"| {alpha:.2f} | {' | '.join(cells)} |")
     lines.append("")
 
     # ── Rule type breakdown (eps=0.02) ────────────────────────────────────
@@ -513,7 +555,7 @@ def generate_aggregated_report(data):
     lines.append("## Speedup Analysis")
     lines.append("")
     exp_a_full = ver[ver["exp_type"] == "A_full_rule"] if "exp_type" in ver.columns else ver
-    bl_times = exp_a_full[exp_a_full["table"].str.contains("baseline", case=False, na=False)][
+    bl_times = dedupe_baseline_queries(exp_a_full[exp_a_full["table"].str.contains("baseline", case=False, na=False)])[ 
         ["model", "prop", "epsilon", "target_label", "result", "time_s"]
     ].rename(columns={"result": "bl_result", "time_s": "bl_time"})
     nap_times = exp_a_full[~exp_a_full["table"].str.contains("baseline", case=False, na=False)]
@@ -528,14 +570,14 @@ def generate_aggregated_report(data):
         both = bl_y.merge(nap_best, on=["model", "prop", "epsilon", "target_label"], how="inner")
         if len(both) > 0:
             both["speedup"] = both["bl_time"] / both["nap_time"].clip(lower=0.01)
-            lines.append(f"- **Both verify Y:** {len(both)} cases")
+            lines.append(f"- **Both verify Y:** {len(both)} unique queries")
             lines.append(f"- **Mean speedup:** {both['speedup'].mean():.1f}x (median {both['speedup'].median():.1f}x)")
             lines.append(f"- **Mean baseline time:** {both['bl_time'].mean():.2f}s")
             lines.append(f"- **Mean NAP time:** {both['nap_time'].mean():.2f}s")
 
         bl_fail = bl_times[bl_times["bl_result"].isin(["N", "T/o"])]
         rescued = bl_fail.merge(nap_best, on=["model", "prop", "epsilon", "target_label"], how="inner")
-        lines.append(f"- **Baseline fails, NAP verifies:** {len(rescued)} cases")
+        lines.append(f"- **Baseline fails, NAP verifies:** {len(rescued)} unique queries")
         if len(rescued) > 0:
             lines.append(f"  - From timeout: {(rescued['bl_result'] == 'T/o').sum()}")
             lines.append(f"  - From falsified: {(rescued['bl_result'] == 'N').sum()}")
@@ -544,8 +586,8 @@ def generate_aggregated_report(data):
     # ── Per-model summary table ───────────────────────────────────────────
     lines.append("## Per-Model Summary")
     lines.append("")
-    lines.append("| Model | Props | Exp A | Exp B | Exp C | Best Y% (ε=0.02, α=0.90) |")
-    lines.append("|-------|-------|-------|-------|-------|--------------------------|")
+    lines.append("| Model | Props | Full-Rule Groups | Per-Layer Groups | Impl-Ablation Groups | Best Row-Level Y% (ε=0.02, α=0.90) |")
+    lines.append("|-------|-------|------------------|------------------|-----------------------|------------------------------------|")
 
     for model in sorted(data["model"].unique(), key=lambda m: (int(m.split("_")[0]), int(m.split("_")[1]))):
         mdf = data[data["model"] == model]

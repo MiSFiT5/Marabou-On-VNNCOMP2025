@@ -33,6 +33,7 @@ NUM_CLASSES = 10
 EPSILONS = [0.02, 0.05, 0.10, 0.20]
 ALPHAS = [0.90, 0.95, 0.99]
 MODELS = [("mnist256x2", 2), ("mnist256x4", 4), ("mnist256x6", 6)]
+VALID_RESULTS = {"Y", "N", "T/o"}
 MODEL_ONNX = {
     "mnist256x2": "mnist-net_256x2.onnx",
     "mnist256x4": "mnist-net_256x4.onnx",
@@ -106,6 +107,38 @@ def fmt_cell(result, time_s):
         return f"N<br><sub>{t}s</sub>"
 
 
+def valid_rows(df):
+    """Keep only rows that correspond to actual verification queries."""
+    return df[df["result"].isin(VALID_RESULTS)].copy()
+
+
+def dedupe_baseline_queries(df, keep_alpha=False):
+    """
+    Collapse repeated baseline executions to one canonical run per unique query.
+
+    Baseline rows are duplicated across alpha directories and across
+    per-layer / impl-ablation experiment folders. Summary tables should count
+    each `(model, class, ε, target)` query once rather than every rerun.
+    """
+    if df.empty:
+        return df.copy()
+
+    key_cols = [c for c in ["model", "class_id_exp", "epsilon", "target_label"] if c in df.columns]
+    if keep_alpha and "alpha" in df.columns:
+        key_cols.append("alpha")
+
+    sort_cols = [c for c in ["model", "class_id_exp", "epsilon", "target_label", "exp_type", "alpha", "layer_pair", "time_s"] if c in df.columns]
+    return df.sort_values(sort_cols).drop_duplicates(subset=key_cols, keep="first").copy()
+
+
+def any_verified_stats(df, group_cols):
+    """Return (verified_queries, total_queries) after collapsing rule-row duplicates."""
+    if df.empty:
+        return 0, 0
+    best = df.groupby(group_cols)["result"].apply(lambda s: (s == "Y").any())
+    return int(best.sum()), int(len(best))
+
+
 def build_detail_table(df_rule, true_class):
     lines = []
     targets = list(range(NUM_CLASSES))
@@ -145,6 +178,7 @@ def generate_model_report(model_name, model_data):
     layer_pairs = MODEL_LAYERS[model_name]
 
     classes = sorted(model_data["class_id_exp"].unique())
+    missing_classes = [c for c in range(NUM_CLASSES) if c not in classes]
     exp_types = sorted(model_data["exp_type"].unique())
 
     lines = []
@@ -156,17 +190,48 @@ def generate_model_report(model_name, model_data):
     lines.append("")
     lines.append(f"**Model file:** `{onnx}`  ")
     lines.append(f"**Architecture:** 784 → {'256 → ' * n_layers}10  ")
-    lines.append(f"**Classes covered:** {', '.join(str(c) for c in classes)} ({len(classes)} total)  ")
+    lines.append(f"**Classes with at least one experiment:** {', '.join(str(c) for c in classes)} ({len(classes)} total)  ")
+    if missing_classes:
+        lines.append(f"**Missing classes in current results:** {', '.join(str(c) for c in missing_classes)}  ")
     lines.append(f"**Layer pairs:** {', '.join(layer_pairs)}  ")
     lines.append(f"**Experiment types:** {', '.join(et.replace('A_', '').replace('B_', '').replace('C_', '') for et in exp_types)}")
     lines.append("")
 
-    ver = model_data[model_data["result"].isin(["Y", "N", "T/o"])]
+    ver = valid_rows(model_data)
+    full_rule_nap = ver[(ver["exp_type"] == "A_full_rule") & ~ver["table"].str.contains("baseline", case=False, na=False)]
+
+    lines.append("## How To Read Counts")
+    lines.append("")
+    lines.append("- `Classes with at least one experiment` means the classes that appear anywhere in the current result directory; missing classes have no report rows yet.")
+    lines.append("- `Aggregated Summary` below is row-level: each rule family contributes its own verification rows, so denominators grow with the number of rule families shown.")
+    lines.append("- In `Per-Layer`, shared unary / baseline rows are repeated once per layer-pair directory; this section reports those raw reruns because it is a per-experiment summary.")
+    lines.append("- `Full-Rule Unique Query Coverage` collapses rule-row duplicates and answers the simpler question: for a `(class, ε, target)` query, did any full-rule NAP rule verify it?")
+    lines.append("")
+
+    if len(full_rule_nap) > 0:
+        lines.append("## Full-Rule Unique Query Coverage")
+        lines.append("")
+        lines.append("At least one NAP rule type achieves `Y` for a given `(class, ε, target)` query.")
+        lines.append("")
+        lines.append("| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |")
+        lines.append("|---|--------|--------|--------|--------|")
+        for alpha in ALPHAS:
+            adf = full_rule_nap[abs(full_rule_nap["alpha"] - alpha) < 1e-6]
+            if len(adf) == 0:
+                continue
+            cells = []
+            for eps in EPSILONS:
+                edf = adf[abs(adf["epsilon"] - eps) < 1e-6]
+                ny, n = any_verified_stats(edf, ["class_id_exp", "target_label"])
+                pct = f"{ny/n*100:.1f}%" if n > 0 else "–"
+                cells.append(f"{ny}/{n} ({pct})")
+            lines.append(f"| {alpha:.2f} | {' | '.join(cells)} |")
+        lines.append("")
 
     # ── Aggregated summary ──
     lines.append("---")
     lines.append("")
-    lines.append("## Aggregated Summary (across all classes)")
+    lines.append("## Aggregated Summary (row-level counts across all classes)")
     lines.append("")
 
     for exp_label, exp_key in [("Full-Rule", "A_full_rule"), ("Per-Layer", "B_per_layer"), ("Impl Ablation", "C_impl_ablation")]:
@@ -266,9 +331,10 @@ def generate_model_report(model_name, model_data):
 
 
 def generate_aggregated_report(data):
-    ver = data[data["result"].isin(["Y", "N", "T/o"])]
+    ver = valid_rows(data)
     bl = ver[ver["table"].str.contains("baseline", case=False, na=False)]
     nap = ver[~ver["table"].str.contains("baseline", case=False, na=False)]
+    bl_unique = dedupe_baseline_queries(bl)
 
     lines = []
     lines.append("# MNIST — Aggregated Results")
@@ -288,12 +354,17 @@ def generate_aggregated_report(data):
     lines.append(f"- **Impl ablation experiments:** {n_impl}")
     lines.append("")
 
-    # ── Baseline ──
-    lines.append("## Baseline (no NAP rules)")
+    lines.append("## How To Read Counts")
+    lines.append("")
+    lines.append("- The baseline table below is deduplicated to one canonical run per unique query `(model, class, ε, target)`.")
+    lines.append("- `Any-rule verified` collapses all full-rule NAP families for a fixed `(model, class, α, ε, target)` query.")
+    lines.append("- `Row-level totals` keep every rule-row separately, so denominators scale with how many rule families exist for that model.")
     lines.append("")
 
+    lines.append("## Baseline (deduplicated unique queries)")
+    lines.append("")
     for model_name, _ in MODELS:
-        mbl = bl[bl["model"] == model_name]
+        mbl = bl_unique[bl_unique["model"] == model_name]
         if len(mbl) == 0:
             continue
         lines.append(f"### {model_name}")
@@ -310,14 +381,35 @@ def generate_aggregated_report(data):
             lines.append(f"| {eps:.2f} | {ny} | {nn} | {nto} | {n} | {pct} |")
         lines.append("")
 
-    # ── NAP full-rule "any verified" ──
     nap_a = nap[nap["exp_type"] == "A_full_rule"]
 
-    lines.append("## Full-Rule NAP — best across rule types per (model, class)")
+    lines.append("## Full-Rule NAP — any-rule verified per unique query")
     lines.append("")
-    lines.append("At least one NAP rule type achieves Y for a given (model, class, epsilon, target) pair.")
+    lines.append("At least one NAP rule type achieves `Y` for a given `(model, class, ε, target)` query.")
     lines.append("")
+    for model_name, _ in MODELS:
+        mdf = nap_a[nap_a["model"] == model_name]
+        if len(mdf) == 0:
+            continue
+        lines.append(f"### {model_name}")
+        lines.append("")
+        lines.append("| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |")
+        lines.append("|---|--------|--------|--------|--------|")
+        for alpha in ALPHAS:
+            adf = mdf[abs(mdf["alpha"] - alpha) < 1e-6]
+            cells = []
+            for eps in EPSILONS:
+                edf = adf[abs(adf["epsilon"] - eps) < 1e-6]
+                ny, n = any_verified_stats(edf, ["class_id_exp", "target_label"])
+                pct = f"{ny/n*100:.1f}%" if n > 0 else "–"
+                cells.append(f"{ny}/{n} ({pct})")
+            lines.append(f"| {alpha:.2f} | {' | '.join(cells)} |")
+        lines.append("")
 
+    lines.append("## Full-Rule NAP — row-level totals across all rule rows")
+    lines.append("")
+    lines.append("Each rule family contributes its own verification rows, so these percentages are not deduplicated across rule families.")
+    lines.append("")
     for model_name, _ in MODELS:
         mdf = nap_a[nap_a["model"] == model_name]
         if len(mdf) == 0:
@@ -335,13 +427,11 @@ def generate_aggregated_report(data):
                 ny = (edf["result"] == "Y").sum()
                 pct = f"{ny/n*100:.1f}%" if n > 0 else "–"
                 cells.append(f"{ny}/{n} ({pct})")
-            lines.append(f"| {alpha} | {' | '.join(cells)} |")
+            lines.append(f"| {alpha:.2f} | {' | '.join(cells)} |")
         lines.append("")
 
-    # ── Rule type breakdown (ε=0.02) ──
-    lines.append("## Rule Type Breakdown (ε=0.02)")
+    lines.append("## Rule Type Breakdown (ε=0.02, row-level)")
     lines.append("")
-
     for model_name, _ in MODELS:
         mdf = nap_a[(nap_a["model"] == model_name) & (abs(nap_a["epsilon"] - 0.02) < 1e-6)]
         if len(mdf) == 0:
@@ -373,12 +463,10 @@ def generate_aggregated_report(data):
             lines.append(f"| `{base}` | {' | '.join(cells)} |")
         lines.append("")
 
-    # ── Speedup ──
     lines.append("## Speedup Analysis")
     lines.append("")
-
     exp_a = ver[ver["exp_type"] == "A_full_rule"]
-    bl_times = exp_a[exp_a["table"].str.contains("baseline", case=False, na=False)][
+    bl_times = dedupe_baseline_queries(exp_a[exp_a["table"].str.contains("baseline", case=False, na=False)])[
         ["model", "class_id_exp", "epsilon", "target_label", "result", "time_s"]
     ].rename(columns={"result": "bl_result", "time_s": "bl_time"})
     nap_times = exp_a[~exp_a["table"].str.contains("baseline", case=False, na=False)]
@@ -393,25 +481,23 @@ def generate_aggregated_report(data):
         both = bl_y.merge(nap_best, on=["model", "class_id_exp", "epsilon", "target_label"], how="inner")
         if len(both) > 0:
             both["speedup"] = both["bl_time"] / both["nap_time"].clip(lower=0.001)
-            lines.append(f"- **Both verify Y:** {len(both)} cases")
+            lines.append(f"- **Both verify Y:** {len(both)} unique queries")
             lines.append(f"- **Mean speedup:** {both['speedup'].mean():.1f}x (median {both['speedup'].median():.1f}x)")
             lines.append(f"- **Mean baseline time:** {both['bl_time'].mean():.2f}s")
             lines.append(f"- **Mean NAP time:** {both['nap_time'].mean():.2f}s")
 
         bl_fail = bl_times[bl_times["bl_result"].isin(["N", "T/o"])]
         rescued = bl_fail.merge(nap_best, on=["model", "class_id_exp", "epsilon", "target_label"], how="inner")
-        lines.append(f"- **Baseline fails, NAP verifies:** {len(rescued)} cases")
+        lines.append(f"- **Baseline fails, NAP verifies:** {len(rescued)} unique queries")
         if len(rescued) > 0:
             lines.append(f"  - From timeout: {(rescued['bl_result'] == 'T/o').sum()}")
             lines.append(f"  - From falsified: {(rescued['bl_result'] == 'N').sum()}")
     lines.append("")
 
-    # ── Per-model summary ──
     lines.append("## Per-Model Summary")
     lines.append("")
-    lines.append("| Model | Layers | Classes | Full-Rule | Per-Layer | Impl Ablation | Best Y% (ε=0.02, α=0.90) |")
-    lines.append("|-------|--------|---------|-----------|-----------|---------------|--------------------------|")
-
+    lines.append("| Model | Layers | Classes With Data | Full-Rule Groups | Per-Layer Groups | Impl Ablation Groups | Best Row-Level Y% (ε=0.02, α=0.90) |")
+    lines.append("|-------|--------|-------------------|------------------|------------------|----------------------|------------------------------------|")
     for model_name, n_layers in MODELS:
         mdf = data[data["model"] == model_name]
         if len(mdf) == 0:
@@ -421,8 +507,8 @@ def generate_aggregated_report(data):
         n_pl = mdf[mdf["exp_type"] == "B_per_layer"].groupby(["class_id_exp", "alpha", "layer_pair"]).ngroups
         n_ia = mdf[mdf["exp_type"] == "C_impl_ablation"].groupby(["class_id_exp", "alpha"]).ngroups
 
-        mver = mdf[(mdf["result"].isin(["Y", "N", "T/o"])) & (mdf["exp_type"] == "A_full_rule")
-                    & (abs(mdf["epsilon"] - 0.02) < 1e-6) & (abs(mdf["alpha"] - 0.90) < 1e-6)]
+        mver = valid_rows(mdf[(mdf["exp_type"] == "A_full_rule")
+                    & (abs(mdf["epsilon"] - 0.02) < 1e-6) & (abs(mdf["alpha"] - 0.90) < 1e-6)])
         mnap = mver[~mver["table"].str.contains("baseline", case=False, na=False)]
         if len(mnap) > 0:
             ny = (mnap["result"] == "Y").sum()
@@ -447,14 +533,17 @@ def generate_readme(data):
     lines.append("")
     lines.append("## Models")
     lines.append("")
-    lines.append("| Model | Architecture | ONNX | Layer Pairs |")
-    lines.append("|-------|-------------|------|-------------|")
+    lines.append("| Model | Architecture | ONNX | Layer Pairs | Classes With Data |")
+    lines.append("|-------|-------------|------|-------------|-------------------|")
     for model_name, n_layers in MODELS:
         onnx = MODEL_ONNX[model_name]
         lps = MODEL_LAYERS[model_name]
         arch = f"784 → {'256 → ' * n_layers}10"
-        lines.append(f"| [{model_name}]({model_name}.md) | {arch} | `{onnx}` | {', '.join(lps)} |")
+        classes = sorted(int(c) for c in data[data["model"] == model_name]["class_id_exp"].dropna().unique())
+        class_desc = ", ".join(str(c) for c in classes) if classes else "–"
+        lines.append(f"| [{model_name}]({model_name}.md) | {arch} | `{onnx}` | {', '.join(lps)} | {class_desc} |")
     lines.append("")
+
     lines.append("## Experiment Types")
     lines.append("")
     lines.append("| Label | Description |")
@@ -463,6 +552,14 @@ def generate_readme(data):
     lines.append("| Per-Layer | Single layer pair at a time |")
     lines.append("| Impl Ablation | Each implication direction tested separately |")
     lines.append("")
+
+    lines.append("## How To Read Counts")
+    lines.append("")
+    lines.append("- Baseline counts are deduplicated to one canonical run per `(model, class, ε, target)` query.")
+    lines.append("- `Any-rule verified` collapses all full-rule NAP families for a fixed `(model, class, α, ε, target)` query.")
+    lines.append("- `Row-level totals` count every rule-row separately, so the denominator grows with the number of rule families.")
+    lines.append("")
+
     lines.append("## Reports")
     lines.append("")
     lines.append("- **[All_Models_Aggregated.md](All_Models_Aggregated.md)** — Overall statistics and comparison")
@@ -473,7 +570,6 @@ def generate_readme(data):
         lines.append(f"- [{model_name}]({model_name}.md)")
     lines.append("")
 
-    # ── Analysis ──
     lines.append("---")
     lines.append("")
     lines.append("## Analysis")
@@ -481,14 +577,14 @@ def generate_readme(data):
     lines.append("See [All_Models_Aggregated.md](All_Models_Aggregated.md) for full tables.")
     lines.append("")
 
-    ver = data[data["result"].isin(["Y", "N", "T/o"])]
-    bl = ver[ver["table"].str.contains("baseline", case=False, na=False)]
+    ver = valid_rows(data)
+    bl = dedupe_baseline_queries(ver[ver["table"].str.contains("baseline", case=False, na=False)])
     nap_a = ver[(ver["exp_type"] == "A_full_rule") & ~ver["table"].str.contains("baseline", case=False, na=False)]
 
     lines.append("### Baseline Performance")
     lines.append("")
     for model_name, _ in MODELS:
-        mbl = bl[(bl["model"] == model_name) & (bl["exp_type"] == "A_full_rule")]
+        mbl = bl[bl["model"] == model_name]
         if len(mbl) == 0:
             continue
         for eps in [0.02, 0.05]:
@@ -499,7 +595,24 @@ def generate_readme(data):
             lines.append(f"- **{model_name}** ε={eps:.2f}: {ny}/{n} ({pct})")
     lines.append("")
 
-    lines.append("### NAP Improvement (Full-Rule, α=0.90)")
+    lines.append("### Full-Rule NAP — Any-Rule Verified (α=0.90)")
+    lines.append("")
+    lines.append("| Model | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |")
+    lines.append("|-------|--------|--------|--------|--------|")
+    for model_name, _ in MODELS:
+        mdf = nap_a[(nap_a["model"] == model_name) & (abs(nap_a["alpha"] - 0.90) < 1e-6)]
+        if len(mdf) == 0:
+            continue
+        cells = []
+        for eps in EPSILONS:
+            edf = mdf[abs(mdf["epsilon"] - eps) < 1e-6]
+            ny, n = any_verified_stats(edf, ["class_id_exp", "target_label"])
+            pct = f"{ny/n*100:.1f}%" if n > 0 else "–"
+            cells.append(f"{ny}/{n} ({pct})")
+        lines.append(f"| {model_name} | {' | '.join(cells)} |")
+    lines.append("")
+
+    lines.append("### Full-Rule NAP — Row-Level Totals (α=0.90)")
     lines.append("")
     lines.append("| Model | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |")
     lines.append("|-------|--------|--------|--------|--------|")
@@ -519,9 +632,12 @@ def generate_readme(data):
 
     lines.append("### Key Findings")
     lines.append("")
+    missing_mnist256x4 = sorted(set(range(NUM_CLASSES)) - set(int(c) for c in data[data["model"] == "mnist256x4"]["class_id_exp"].dropna().unique()))
+    if missing_mnist256x4:
+        lines.append(f"- **mnist256x4 is still incomplete:** missing classes {', '.join(str(c) for c in missing_mnist256x4)}.")
 
     exp_a = ver[ver["exp_type"] == "A_full_rule"]
-    bl_times = exp_a[exp_a["table"].str.contains("baseline", case=False, na=False)][
+    bl_times = dedupe_baseline_queries(exp_a[exp_a["table"].str.contains("baseline", case=False, na=False)])[
         ["model", "class_id_exp", "epsilon", "target_label", "result", "time_s"]
     ].rename(columns={"result": "bl_result", "time_s": "bl_time"})
     nap_v = nap_a[nap_a["result"] == "Y"]
@@ -531,16 +647,16 @@ def generate_readme(data):
         )["time_s"].min().reset_index().rename(columns={"time_s": "nap_time"})
         bl_fail = bl_times[bl_times["bl_result"].isin(["N", "T/o"])]
         rescued = bl_fail.merge(nap_best, on=["model", "class_id_exp", "epsilon", "target_label"], how="inner")
-        lines.append(f"- **{len(rescued)} rescue cases:** baseline returns N or T/o, but NAP verifies successfully.")
+        lines.append(f"- **{len(rescued)} unique rescue queries:** baseline returns `N` or `T/o`, but some NAP rule verifies.")
 
         bl_y = bl_times[bl_times["bl_result"] == "Y"]
         both = bl_y.merge(nap_best, on=["model", "class_id_exp", "epsilon", "target_label"], how="inner")
         if len(both) > 0:
             both["speedup"] = both["bl_time"] / both["nap_time"].clip(lower=0.001)
-            lines.append(f"- **{both['speedup'].mean():.1f}x mean speedup** on {len(both)} cases where both baseline and NAP verify.")
+            lines.append(f"- **{both['speedup'].mean():.1f}x mean speedup** on {len(both)} unique queries where both baseline and NAP verify.")
     lines.append("")
 
-    lines.append("### Rule Type Ranking (ε=0.02, α=0.90)")
+    lines.append("### Rule Type Ranking (ε=0.02, α=0.90, row-level)")
     lines.append("")
     for model_name, _ in MODELS:
         mdf = nap_a[(nap_a["model"] == model_name) & (abs(nap_a["alpha"] - 0.90) < 1e-6) & (abs(nap_a["epsilon"] - 0.02) < 1e-6)]
@@ -565,13 +681,11 @@ def generate_readme(data):
             lines.append(f"| {base} | {ny}/{n} ({pct:.1f}%) |")
         lines.append("")
 
-    lines.append("### Depth Effect")
-    lines.append("")
-    lines.append("How does network depth affect verification?")
+    lines.append("### Depth Effect (row-level, α=0.90)")
     lines.append("")
     for eps in [0.02, 0.05]:
         vals = []
-        for model_name, n_layers in MODELS:
+        for model_name, _ in MODELS:
             mdf = nap_a[(nap_a["model"] == model_name) & (abs(nap_a["alpha"] - 0.90) < 1e-6) & (abs(nap_a["epsilon"] - eps) < 1e-6)]
             if len(mdf) == 0:
                 continue
@@ -580,7 +694,7 @@ def generate_readme(data):
             pct = ny / n * 100 if n > 0 else 0
             vals.append(f"{model_name}: {ny}/{n} ({pct:.1f}%)")
         if vals:
-            lines.append(f"- **ε={eps:.2f}, α=0.90:** {' | '.join(vals)}")
+            lines.append(f"- **ε={eps:.2f}:** {' | '.join(vals)}")
     lines.append("")
 
     return "\n".join(lines)

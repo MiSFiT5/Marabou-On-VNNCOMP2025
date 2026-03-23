@@ -104,13 +104,17 @@ initialization is intrinsically more robust than another.
 The trained reference is already documented in [../mnist_reports/](../mnist_reports/README.md).
 At `epsilon=0.05`, the closest comparison is:
 
+For `mnist256x4`, the trained rows below use the currently available
+`alpha=0.95` full-rule subset, which covers `7` classes (`63` off-target
+queries). The trained MNIST directory has `8` classes with some data overall.
+
 | Setting | Model | Coverage | Y | N | T/o |
 |---------|-------|----------|---|---|-----|
 | Random baseline | mnist256x4 | 6 classes, 54 rows per init | 0 | 23 to 27 | 27 to 31 |
 | Random baseline | mnist256x6 | 6 classes, 54 rows per init | 0 | 0 | 54 |
-| Trained baseline | mnist256x4 | 7 classes, 63 rows | 0 | 9 | 54 |
+| Trained baseline | mnist256x4 | 7 classes with `alpha=0.95` full-rule data, 63 rows | 0 | 9 | 54 |
 | Trained baseline | mnist256x6 | 10 classes, 90 rows | 0 | 0 | 90 |
-| Trained full-rule NAP, `alpha=0.95` | mnist256x4 | 7 classes, 63 rows | 63 | 0 | 0 |
+| Trained full-rule NAP, `alpha=0.95` | mnist256x4 | 7 classes with `alpha=0.95` full-rule data, 63 rows | 63 | 0 | 0 |
 | Trained full-rule NAP, `alpha=0.95` | mnist256x6 | 10 classes, 90 rows | 90 | 0 | 0 |
 
 This supports the following reading:

@@ -1,6 +1,6 @@
 # MNIST — Aggregated Results
 
-> Generated 2026-03-18  
+> Generated 2026-03-20  
 > Experiments: per-class, no rule cap
 
 - **Total CSV rows:** 106,640
@@ -11,44 +11,78 @@
 - **Per-layer experiments:** 239
 - **Impl ablation experiments:** 52
 
-## Baseline (no NAP rules)
+## How To Read Counts
+
+- The baseline table below is deduplicated to one canonical run per unique query `(model, class, ε, target)`.
+- `Any-rule verified` collapses all full-rule NAP families for a fixed `(model, class, α, ε, target)` query.
+- `Row-level totals` keep every rule-row separately, so denominators scale with how many rule families exist for that model.
+
+## Baseline (deduplicated unique queries)
 
 ### mnist256x2
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 473 | 8 | 221 | 702 | 67.4% |
-| 0.05 | 0 | 475 | 227 | 702 | 0.0% |
-| 0.10 | 0 | 688 | 14 | 702 | 0.0% |
-| 0.20 | 0 | 702 | 0 | 702 | 0.0% |
+| 0.02 | 63 | 1 | 26 | 90 | 70.0% |
+| 0.05 | 0 | 60 | 30 | 90 | 0.0% |
+| 0.10 | 0 | 88 | 2 | 90 | 0.0% |
+| 0.20 | 0 | 90 | 0 | 90 | 0.0% |
 
 ### mnist256x4
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 299 | 0 | 484 | 783 | 38.2% |
-| 0.05 | 0 | 106 | 677 | 783 | 0.0% |
-| 0.10 | 0 | 372 | 411 | 783 | 0.0% |
-| 0.20 | 0 | 559 | 224 | 783 | 0.0% |
+| 0.02 | 31 | 0 | 41 | 72 | 43.1% |
+| 0.05 | 0 | 9 | 63 | 72 | 0.0% |
+| 0.10 | 0 | 33 | 39 | 72 | 0.0% |
+| 0.20 | 0 | 55 | 17 | 72 | 0.0% |
 
 ### mnist256x6
 
 | ε | Y | N | T/o | Total | Verified % |
 |---|---|---|-----|-------|-----------|
-| 0.02 | 747 | 0 | 1116 | 1863 | 40.1% |
-| 0.05 | 0 | 0 | 1863 | 1863 | 0.0% |
-| 0.10 | 0 | 0 | 1863 | 1863 | 0.0% |
-| 0.20 | 0 | 4 | 1859 | 1863 | 0.0% |
+| 0.02 | 36 | 0 | 54 | 90 | 40.0% |
+| 0.05 | 0 | 0 | 90 | 90 | 0.0% |
+| 0.10 | 0 | 0 | 90 | 90 | 0.0% |
+| 0.20 | 0 | 0 | 90 | 90 | 0.0% |
 
-## Full-Rule NAP — best across rule types per (model, class)
+## Full-Rule NAP — any-rule verified per unique query
 
-At least one NAP rule type achieves Y for a given (model, class, epsilon, target) pair.
+At least one NAP rule type achieves `Y` for a given `(model, class, ε, target)` query.
 
 ### mnist256x2
 
 | α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
 |---|--------|--------|--------|--------|
-| 0.9 | 359/360 (99.7%) | 186/360 (51.7%) | 89/360 (24.7%) | 75/360 (20.8%) |
+| 0.90 | 90/90 (100.0%) | 90/90 (100.0%) | 77/90 (85.6%) | 70/90 (77.8%) |
+| 0.95 | 90/90 (100.0%) | 72/90 (80.0%) | 48/90 (53.3%) | 23/90 (25.6%) |
+| 0.99 | 90/90 (100.0%) | 12/90 (13.3%) | 0/90 (0.0%) | 0/90 (0.0%) |
+
+### mnist256x4
+
+| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
+|---|--------|--------|--------|--------|
+| 0.90 | 63/63 (100.0%) | 63/63 (100.0%) | 63/63 (100.0%) | 63/63 (100.0%) |
+| 0.95 | 63/63 (100.0%) | 63/63 (100.0%) | 61/63 (96.8%) | 58/63 (92.1%) |
+| 0.99 | 54/63 (85.7%) | 36/63 (57.1%) | 36/63 (57.1%) | 36/63 (57.1%) |
+
+### mnist256x6
+
+| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
+|---|--------|--------|--------|--------|
+| 0.90 | 90/90 (100.0%) | 90/90 (100.0%) | 90/90 (100.0%) | 90/90 (100.0%) |
+| 0.95 | 90/90 (100.0%) | 90/90 (100.0%) | 90/90 (100.0%) | 90/90 (100.0%) |
+| 0.99 | 63/90 (70.0%) | 60/90 (66.7%) | 54/90 (60.0%) | 55/90 (61.1%) |
+
+## Full-Rule NAP — row-level totals across all rule rows
+
+Each rule family contributes its own verification rows, so these percentages are not deduplicated across rule families.
+
+### mnist256x2
+
+| α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
+|---|--------|--------|--------|--------|
+| 0.90 | 359/360 (99.7%) | 186/360 (51.7%) | 89/360 (24.7%) | 75/360 (20.8%) |
 | 0.95 | 358/360 (99.4%) | 124/360 (34.4%) | 48/360 (13.3%) | 23/360 (6.4%) |
 | 0.99 | 304/360 (84.4%) | 16/360 (4.4%) | 0/360 (0.0%) | 0/360 (0.0%) |
 
@@ -56,7 +90,7 @@ At least one NAP rule type achieves Y for a given (model, class, epsilon, target
 
 | α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
 |---|--------|--------|--------|--------|
-| 0.9 | 273/378 (72.2%) | 126/378 (33.3%) | 122/378 (32.3%) | 120/378 (31.7%) |
+| 0.90 | 273/378 (72.2%) | 126/378 (33.3%) | 122/378 (32.3%) | 120/378 (31.7%) |
 | 0.95 | 302/378 (79.9%) | 122/378 (32.3%) | 117/378 (31.0%) | 114/378 (30.2%) |
 | 0.99 | 226/378 (59.8%) | 72/378 (19.0%) | 72/378 (19.0%) | 72/378 (19.0%) |
 
@@ -64,11 +98,11 @@ At least one NAP rule type achieves Y for a given (model, class, epsilon, target
 
 | α | ε=0.02 | ε=0.05 | ε=0.10 | ε=0.20 |
 |---|--------|--------|--------|--------|
-| 0.9 | 414/720 (57.5%) | 180/720 (25.0%) | 180/720 (25.0%) | 180/720 (25.0%) |
+| 0.90 | 414/720 (57.5%) | 180/720 (25.0%) | 180/720 (25.0%) | 180/720 (25.0%) |
 | 0.95 | 405/720 (56.2%) | 180/720 (25.0%) | 180/720 (25.0%) | 180/720 (25.0%) |
 | 0.99 | 342/720 (47.5%) | 119/720 (16.5%) | 108/720 (15.0%) | 109/720 (15.1%) |
 
-## Rule Type Breakdown (ε=0.02)
+## Rule Type Breakdown (ε=0.02, row-level)
 
 ### mnist256x2
 
@@ -105,18 +139,18 @@ At least one NAP rule type achieves Y for a given (model, class, epsilon, target
 
 ## Speedup Analysis
 
-- **Both verify Y:** 373 cases
-- **Mean speedup:** 6.0x (median 1.8x)
-- **Mean baseline time:** 4.47s
+- **Both verify Y:** 130 unique queries
+- **Mean speedup:** 5.5x (median 1.8x)
+- **Mean baseline time:** 4.10s
 - **Mean NAP time:** 0.86s
-- **Baseline fails, NAP verifies:** 2444 cases
-  - From timeout: 1565
-  - From falsified: 879
+- **Baseline fails, NAP verifies:** 845 unique queries
+  - From timeout: 542
+  - From falsified: 303
 
 ## Per-Model Summary
 
-| Model | Layers | Classes | Full-Rule | Per-Layer | Impl Ablation | Best Y% (ε=0.02, α=0.90) |
-|-------|--------|---------|-----------|-----------|---------------|--------------------------|
+| Model | Layers | Classes With Data | Full-Rule Groups | Per-Layer Groups | Impl Ablation Groups | Best Row-Level Y% (ε=0.02, α=0.90) |
+|-------|--------|-------------------|------------------|------------------|----------------------|------------------------------------|
 | [mnist256x2](mnist256x2.md) | 2 | 10 | 30 | 30 | 18 | 99.7% |
 | [mnist256x4](mnist256x4.md) | 4 | 8 | 21 | 59 | 7 | 72.2% |
 | [mnist256x6](mnist256x6.md) | 6 | 10 | 30 | 150 | 27 | 57.5% |

@@ -111,11 +111,16 @@ pattern data.
 The closest trained reference is the baseline section of
 [../mnist_reports/mnist256x4.md](../mnist_reports/mnist256x4.md):
 
+Because the most informative trained comparator here is the currently available
+`alpha=0.95` full-rule slice, the trained rows below cover `7` classes (`63`
+off-target queries). The broader trained MNIST directory contains `8` classes
+with some data overall.
+
 | Setting | Coverage | Y | N | T/o |
 |---------|----------|---|---|-----|
 | Random baseline | 6 classes, 54 rows per init | 0 | 23 to 27 | 27 to 31 |
-| Trained baseline | 7 classes, 63 rows | 0 | 9 | 54 |
-| Trained full-rule NAP, `alpha=0.95` | 7 classes, 63 rows | 63 | 0 | 0 |
+| Trained baseline | 7 classes with `alpha=0.95` full-rule data, 63 rows | 0 | 9 | 54 |
+| Trained full-rule NAP, `alpha=0.95` | 7 classes with `alpha=0.95` full-rule data, 63 rows | 63 | 0 | 0 |
 
 So for `mnist256x4`, the current random study mostly shows that lucky centers
 can still be brittle under baseline verification, while trained `NAP` remains
