@@ -37,8 +37,9 @@ The network is a fully-connected ReLU MLP for MNIST digit classification:
 |-------|-------------|--------------|-------------|----------|
 | A | 784 → hidden → 10 (FC, MNIST) | 70 | epoch_000 (0%), epoch_018 (25%), epoch_035 (50%), epoch_052 (75%), epoch_070 (100%) | Standard CE |
 | B | same | 100 | epoch_000 (0%), epoch_025 (25%), epoch_050 (50%), epoch_075 (75%), epoch_100 (100%) | Standard CE |
+| T | same | 100 | epoch_000 (0%), epoch_025 (25%), epoch_050 (50%), epoch_075 (75%), epoch_100 (100%) | TRADES adversarial |
 
-Track A and Track B share the **same random initialization** (epoch_000 is identical).
+Track A, B, and T share the **same random initialization** (epoch_000 is identical across all tracks).
 
 ## Verification Setup
 
@@ -81,8 +82,9 @@ Track A and Track B share the **same random initialization** (epoch_000 is ident
 
 ### Per-Track Reports
 
-- [Track_A.md](Track_A.md) — Track A (70 epochs, 5 checkpoints)
-- [Track_B.md](Track_B.md) — Track B (100 epochs, 5 checkpoints)
+- [Track_A.md](Track_A.md) — Track A: Standard CE, 70 epochs
+- [Track_B.md](Track_B.md) — Track B: Standard CE, 100 epochs
+- [Track_T_TRADES.md](Track_T_TRADES.md) — Track T: TRADES adversarial training, 100 epochs
 
 ### Per-Solver Reports
 

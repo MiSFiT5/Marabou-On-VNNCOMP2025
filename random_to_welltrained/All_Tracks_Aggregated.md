@@ -3,9 +3,9 @@
 > Generated 2026-03-25  
 > Experiments: baseline + unary NAP (ALWAYS_ON + ALWAYS_OFF), vacuous-filtered
 
-- **Total Marabou tasks:** 1,500 (500 baseline + 1,000 NAP)
-- **Total alpha-beta-CROWN tasks:** 1,500 (500 baseline + 1,000 NAP)
-- **Tracks:** A (70 epochs), B (100 epochs)
+- **Total Marabou tasks:** 1,500 (Track A+B) + 750 (Track T TRADES) = 2,250
+- **Total alpha-beta-CROWN tasks:** 1,500 (Track A+B only)
+- **Tracks:** A (CE, 70 epochs), B (CE, 100 epochs), T (TRADES, 100 epochs)
 - **Checkpoints per track:** 5 (0%, 25%, 50%, 75%, 100%)
 - **References per checkpoint:** 10
 - **Epsilon values:** 0.01, 0.02, 0.05, 0.1, 0.2
@@ -98,6 +98,36 @@
 | epoch_100 | 0.05 | 0 | 0 | 10 | 0.0% |
 | epoch_100 | 0.1 | 0 | 1 | 9 | 0.0% |
 | epoch_100 | 0.2 | 0 | 2 | 8 | 0.0% |
+
+### Track T (TRADES)
+
+| Checkpoint | eps | Y | N | T/o | Verified % |
+|------------|-----|---|---|-----|-----------|
+| epoch_000 | 0.01 | 0 | 0 | 10 | 0.0% |
+| epoch_000 | 0.02 | 0 | 0 | 10 | 0.0% |
+| epoch_000 | 0.05 | 0 | 0 | 10 | 0.0% |
+| epoch_000 | 0.1 | 0 | 0 | 10 | 0.0% |
+| epoch_000 | 0.2 | 0 | 0 | 10 | 0.0% |
+| epoch_025 | 0.01 | 10 | 0 | 0 | 100.0% |
+| epoch_025 | 0.02 | 8 | 0 | 2 | 80.0% |
+| epoch_025 | 0.05 | 0 | 0 | 10 | 0.0% |
+| epoch_025 | 0.1 | 0 | 0 | 10 | 0.0% |
+| epoch_025 | 0.2 | 0 | 0 | 10 | 0.0% |
+| epoch_050 | 0.01 | 10 | 0 | 0 | 100.0% |
+| epoch_050 | 0.02 | 7 | 0 | 3 | 70.0% |
+| epoch_050 | 0.05 | 0 | 0 | 10 | 0.0% |
+| epoch_050 | 0.1 | 0 | 0 | 10 | 0.0% |
+| epoch_050 | 0.2 | 0 | 0 | 10 | 0.0% |
+| epoch_075 | 0.01 | 9 | 0 | 1 | 90.0% |
+| epoch_075 | 0.02 | 5 | 1 | 4 | 50.0% |
+| epoch_075 | 0.05 | 0 | 2 | 8 | 0.0% |
+| epoch_075 | 0.1 | 0 | 0 | 10 | 0.0% |
+| epoch_075 | 0.2 | 0 | 1 | 9 | 0.0% |
+| epoch_100 | 0.01 | 9 | 1 | 0 | 90.0% |
+| epoch_100 | 0.02 | 5 | 0 | 5 | 50.0% |
+| epoch_100 | 0.05 | 0 | 1 | 9 | 0.0% |
+| epoch_100 | 0.1 | 0 | 1 | 9 | 0.0% |
+| epoch_100 | 0.2 | 0 | 1 | 9 | 0.0% |
 
 ---
 
