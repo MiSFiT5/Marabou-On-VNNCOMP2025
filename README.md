@@ -150,9 +150,10 @@ Both methods confirm that the NAP region occupies an effectively zero fraction o
 
 ## Status
 
-Update time: March 20th, 2026
+Update time: March 25th, 2026
+- ACAS per-property fixied report
+- Update 2 tracks x 5 checkpoints x 10 reference samples x 5 epsilon sets x 2 alpha sets experiments 
 
-- These results are still incomplete.
-- `mnist256x4` is missing classes `1` and `8`.
-- ACAS per-property full-rule is missing `N2,9 prop8` at `α=0.90` and `α=0.95`.
+- Update NAP with Alpha-Beta Crown (in previous experiments it is too slow to verify with implications)
+
 - RQ2 Box Sandwich is complete (10/10 classes). Beta IS is 8/10 complete (`c0` and `c5` failed on the cluster).
