@@ -10,6 +10,27 @@
 | Q2 | Is the growth relative to the standard (no-NAP) baseline, and by how much? |
 | Q3 | Why does NAP verification peak at ~75% training and degrade at 100%? |
 
+## Model Selection & Architecture
+### Benchmark Origin
+The model used in this experiment comes from the **CORA VNN-COMP 2024 benchmark**
+(`mnist-point` family), published by Koller et al.
+| Item | Detail |
+|------|--------|
+| Benchmark | [cora-vnncomp2024-benchmark](https://github.com/kollerlukas/cora-vnncomp2024-benchmark) |
+| Family | `mnist-point` |
+| Paper | [Certified Training for Set-Based Specifications](https://arxiv.org/abs/2401.14961) (Koller et al., 2024) |
+| Competition | VNN-COMP 2024 |
+**Why this model?** Among all VNN-COMP 2024 benchmarks, `cora/mnist-point` was selected because it satisfies all three criteria simultaneously: (1) verifiable by Marabou (no parser errors), (2) standard ReLU MLP architecture compatible with NAP, and (3) public training data (MNIST) enabling train-from-scratch experiments. See `TASK1_SHORTLIST.md` for the full selection process.
+### Architecture
+The network is a fully-connected ReLU MLP for MNIST digit classification:
+| Component | Detail |
+|-----------|--------|
+| Input | 784 (flattened 28×28 MNIST grayscale image) |
+| Hidden layers | **7** fully-connected layers, each **250** neurons wide |
+| Activation | ReLU (after each hidden layer) |
+| Output | 10 logits (MNIST classes 0–9) |
+| Total parameters | ~570K |
+
 ## Models
 
 | Track | Architecture | Total Epochs | Checkpoints | Training |
