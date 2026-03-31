@@ -254,7 +254,7 @@ This section is very important in the story because:
 - but it is a methodological correction to Step 3;
 - it tells us that the Step 3 trend is unlikely to be only a sample-selection artifact.
 
-### 4.3 Step 4 Exact Verify: the Marabou Fixed-Ref Result Is Now Complete
+### 4.3 Step 4 Exact Verify: Marabou Total Verified on Fixed Refs
 
 ![Step4 Marabou Exact](story_step4_marabou_exact_verified.png)
 
@@ -285,21 +285,43 @@ If we focus only on the checkpoints that should actually be compared, i.e. `prog
 
 This materially upgrades the Step 4 story:
 
-- on fixed refs, the NAP-over-baseline advantage is now supported by exact verification;
+- on fixed refs, the NAP-over-baseline advantage is now supported by exact total verification;
 - the strongest advantage appears exactly where you cared most, namely `ε=0.02`;
 - this means the main Step 3 trend is not just an auto_LiRPA artifact, nor merely a reference-selection artifact.
 
-But the boundary must remain explicit:
+But total verified is not yet the final semantic answer.  
+For NAP, some `Y` results may still be vacuous.
 
-- this exact Step 4 positive-ref path currently reports only `verified`;
-- it does not split positive fixed-ref verification into `genuine` versus `vacuous` the way Section 4.2 does.
+### 4.4 Step 4 Exact Verify: Marabou Genuine Verified on Fixed Refs
 
-So the safest wording is:
+![Step4 Marabou Exact Genuine](story_step4_marabou_exact_genuine.png)
 
-> Step 4 exact now confirms the fixed-ref NAP advantage;  
-> the `genuine / vacuous` semantic decomposition is still mainly explained by `step4_unified_v2`.
+Data sources:
 
-### 4.4 On the Same Fixed Refs, View Exact Verified and Genuine Context in the Same Layout
+- `generated/step4_marabou_v2/results/coverage.csv`
+- `generated/step4_marabou_v2/results/positive_vacuous/`
+
+This now decomposes exact positive-ref results into:
+
+- `genuine`
+- `vacuous`
+- `semantic_unresolved`
+
+For `progress >= 25%`, the mean exact genuine rates are:
+
+| Method | `ε=0.01` | `ε=0.02` |
+| --- | ---: | ---: |
+| Baseline | 81.25% | 13.12% |
+| NAP `α=0.95` | 46.25% | 53.12% |
+| NAP `α=0.99` | 68.75% | 35.00% |
+
+This sharpens the Step 4 exact takeaway:
+
+- at `ε=0.02`, both alphas show clear exact genuine help;
+- at `ε=0.01`, the total gain of `α=0.95` is mostly not genuine;
+- at `ε=0.01`, `α=0.99` is still a conservative lower bound because some cases remain `semantic_unresolved`.
+
+### 4.5 On the Same Fixed Refs, Compare Exact Genuine and auto_LiRPA Genuine in the Same Layout
 
 ![Step4 Verifier Alignment](story_step4_v2_verifier_alignment.png)
 
@@ -308,21 +330,21 @@ Data sources:
 - `generated/step4_unified_v2/results/coverage.csv`
 - `generated/step4_marabou_v2/results/coverage.csv`
 
-This figure keeps the same visual layout as Sections 4.1 and 4.2, but changes the line semantics:
+This figure keeps the same visual layout as Sections 4.1 and 4.2, but now compares genuine against genuine:
 
-- solid lines of the same color denote `Marabou exact verified`
+- solid lines of the same color denote `Marabou exact genuine`
 - dotted lines of the same color denote `auto_LiRPA genuine verified`
 
 It is most useful for two questions:
 
-1. whether the fixed-ref exact verified trend broadly moves with the genuine trend;
-2. how much of the `α=0.95` versus `α=0.99` difference may be tied to the `vacuous` decomposition.
+1. whether the fixed-ref exact genuine trend broadly agrees with the auto_LiRPA genuine trend;
+2. where the exact semantic decomposition is noticeably more conservative than the incomplete trend.
 
 The main visual takeaways are:
 
-- under the baseline, Marabou and auto_LiRPA are very close;
-- under `α=0.99`, exact verified is also quite close to auto_LiRPA genuine;
-- under `α=0.95`, Marabou exact verified is substantially higher than auto_LiRPA genuine, which is exactly where `step4_unified_v2` is still needed to explain the vacuous structure.
+- under the baseline, the two genuine curves coincide;
+- under `α=0.99, ε=0.02`, they also agree closely;
+- under `α=0.95, ε=0.01`, exact genuine is clearly lower than auto_LiRPA genuine, showing that the exact vacuity decomposition is stricter here.
 
 ## 5. Act V: What Does NAP Do to Misclassified Samples?
 
