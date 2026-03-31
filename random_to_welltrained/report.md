@@ -19,16 +19,15 @@ This narrative report currently includes results from:
 - `generated/step3_trades`
 - `generated/step3_auto_lirpa`
 - `generated/step4_unified_v2`
-
-It does **not yet** include:
-
 - `generated/step4_marabou_v2`
 
 Therefore, in the story below:
 
 - Step 3 can be discussed using **Marabou exact** results;
-- Step 4 can currently only be discussed using **fixed-reference + auto_LiRPA** results;
-- the final exact Step 4 conclusion must be added later, after `step4_marabou_v2` is synchronized back.
+- Step 4 can now be discussed using both:
+  - **fixed-reference + auto_LiRPA** for the `genuine / vacuous` decomposition;
+  - **fixed-reference + Marabou exact** for the final verify / rejection trend;
+- but on the positive fixed refs, the current exact path reports only `verified`, not a separate `genuine / vacuous` split.
 
 ## 1. Act I: What Happens During Training?
 
@@ -255,6 +254,76 @@ This section is very important in the story because:
 - but it is a methodological correction to Step 3;
 - it tells us that the Step 3 trend is unlikely to be only a sample-selection artifact.
 
+### 4.3 Step 4 Exact Verify: the Marabou Fixed-Ref Result Is Now Complete
+
+![Step4 Marabou Exact](story_step4_marabou_exact_verified.png)
+
+Data sources:
+
+- `generated/step4_marabou_v2/results/coverage.csv`
+- `generated/step4_marabou_v2/results/verify_all.csv`
+
+The most important fact here is:
+
+- `step4_marabou_v2` reuses the refs/manifests from `step4_unified_v2`;
+- therefore it evaluates **the same fixed refs** as Sections 4.1 and 4.2;
+- what changes is not the reference protocol, but the verifier: from auto_LiRPA to Marabou exact.
+
+The easiest point to misread should be stated explicitly:
+
+- `verify_all.csv` contains `180` `misclassified` cases;
+- this is not a script bug;
+- it happens because `epoch_000` is excluded from ref selection but still retained during evaluation.
+
+If we focus only on the checkpoints that should actually be compared, i.e. `progress >= 25%`, the mean exact verified rates are:
+
+| Method | `ε=0.01` | `ε=0.02` |
+| --- | ---: | ---: |
+| Baseline | 81.25% | 13.12% |
+| NAP `α=0.95` | 99.38% | 72.50% |
+| NAP `α=0.99` | 93.12% | 35.00% |
+
+This materially upgrades the Step 4 story:
+
+- on fixed refs, the NAP-over-baseline advantage is now supported by exact verification;
+- the strongest advantage appears exactly where you cared most, namely `ε=0.02`;
+- this means the main Step 3 trend is not just an auto_LiRPA artifact, nor merely a reference-selection artifact.
+
+But the boundary must remain explicit:
+
+- this exact Step 4 positive-ref path currently reports only `verified`;
+- it does not split positive fixed-ref verification into `genuine` versus `vacuous` the way Section 4.2 does.
+
+So the safest wording is:
+
+> Step 4 exact now confirms the fixed-ref NAP advantage;  
+> the `genuine / vacuous` semantic decomposition is still mainly explained by `step4_unified_v2`.
+
+### 4.4 On the Same Fixed Refs, View Exact Verified and Genuine Context in the Same Layout
+
+![Step4 Verifier Alignment](story_step4_v2_verifier_alignment.png)
+
+Data sources:
+
+- `generated/step4_unified_v2/results/coverage.csv`
+- `generated/step4_marabou_v2/results/coverage.csv`
+
+This figure keeps the same visual layout as Sections 4.1 and 4.2, but changes the line semantics:
+
+- solid lines of the same color denote `Marabou exact verified`
+- dotted lines of the same color denote `auto_LiRPA genuine verified`
+
+It is most useful for two questions:
+
+1. whether the fixed-ref exact verified trend broadly moves with the genuine trend;
+2. how much of the `α=0.95` versus `α=0.99` difference may be tied to the `vacuous` decomposition.
+
+The main visual takeaways are:
+
+- under the baseline, Marabou and auto_LiRPA are very close;
+- under `α=0.99`, exact verified is also quite close to auto_LiRPA genuine;
+- under `α=0.95`, Marabou exact verified is substantially higher than auto_LiRPA genuine, which is exactly where `step4_unified_v2` is still needed to explain the vacuous structure.
+
 ## 5. Act V: What Does NAP Do to Misclassified Samples?
 
 ### 5.1 Misclassified-Sample Rejection
@@ -305,6 +374,35 @@ This is more intuitive than the rejection-rate curve because it shows:
 - rejection is not an abstract percentage; it happens on concrete wrong samples;
 - the behavior becomes more systematic as training progresses;
 - a green border does **not** mean the model has reclassified the sample correctly; it only means NAP has emptied the local region around it.
+
+### 5.3 Step 4 Exact Rejection: This Part of the Story Is Now Also Completed by Marabou
+
+![Step4 Marabou Exact Rejection](story_step4_marabou_exact_rejection.png)
+
+Data sources:
+
+- `generated/step4_marabou_v2/results/rejection_summary.csv`
+- `generated/step4_marabou_v2/results/rejection_all.csv`
+
+These 400 exact rejection tasks are now complete.  
+Aggregated by `(alpha, epsilon)`, the exact results are:
+
+| Alpha | `ε=0.01` | `ε=0.02` |
+| --- | --- | --- |
+| `α=0.95` | `88 rejected / 4 non-empty / 8 T/o` | `77 / 10 / 13` |
+| `α=0.99` | `76 / 14 / 10` | `25 / 23 / 52` |
+
+The story here is very clear:
+
+- `α=0.95` rejects misclassified refs very aggressively;
+- `α=0.99` is also strong at `0.01`, but becomes much more conservative at `0.02`;
+- `α=0.99, ε=0.02` is also substantially harder, with many more timeouts.
+
+More importantly, once we align the exact rejection results with the auto_LiRPA rejection curves in Section 5.1, the mean rejection-rate gap stays within roughly `1-3` percentage points.  
+In other words:
+
+> the Step 4 rejection story does not only hold under incomplete verification;  
+> it is now also largely confirmed by exact Marabou.
 
 ## 6. Act VI: What Do the Fixed References Themselves Look Like?
 
@@ -483,7 +581,8 @@ Within the current data boundary, the strongest narrative chain is:
 3. However, Step 3 uses per-checkpoint refs, so a sample-selection artifact cannot be fully ruled out there.
 4. This motivates the fixed-reference Step 4 design.
 5. `step4_unified_v2` shows that after correcting the ref logic and controlling the reference points, the NAP trend still remains visible.
-6. At the same time, the late-training behavior looks more like:
+6. `step4_marabou_v2` further shows that on **the same fixed refs**, this trend is also supported by exact verification and exact rejection.
+7. At the same time, the late-training behavior looks more like:
    - saturation in total rule count,
    - continued change in rule composition and region geometry,
    - continued redistribution between genuine and vacuous verification.
@@ -492,8 +591,8 @@ Within the current data boundary, the strongest narrative chain is:
 
 There are three places where the story still has to remain disciplined:
 
-1. We must not describe `step4_unified_v2` as the final exact Step 4 conclusion.  
-   `step4_marabou_v2` is still running.
+1. We must not interpret all exact Step 4 verified gains as genuine region expansion.  
+   On the positive fixed refs, `step4_marabou_v2` currently reports `verified`, but does not independently split `genuine` from `vacuous`.
 
 2. We must not directly compare absolute verified percentages between Step 3 and Step 4.  
    Their reference bases are different:
@@ -504,20 +603,22 @@ There are three places where the story still has to remain disciplined:
    The safer wording is still:
    - late training appears to involve changes in region geometry and vacuity behavior;
    - this is compatible with an overconfidence tendency;
-   - but the final exact Step 4 result is still missing.
+   - but the current evidence is still about geometry/vacuity behavior, not a completed causal proof.
 
-## 11. Where to Insert `step4_marabou_v2` Later
+## 11. What `step4_marabou_v2` Changes Now
 
-Once `step4_marabou_v2` is synchronized back, the most natural way to extend this story is:
+Now that `step4_marabou_v2` is complete, the most important upgrades to the story are:
 
-1. After Act IV, add:
-   - `Step 4 fixed refs | Marabou exact | total verified`
-   - `Step 4 fixed refs | Marabou exact | genuine verified`
+1. The fixed-reference trend can now be described as:
+   - `auto_LiRPA` first exposes the `genuine / vacuous` structure;
+   - `Marabou exact` then confirms that the fixed-ref trend is not an incomplete-verification illusion.
 
-2. After Act V, add:
-   - an exact rejection / vacuity comparison
+2. The rejection story can now also be stated as an exact conclusion:
+   - `α=0.95` is more aggressive and rejects more strongly;
+   - `α=0.99` is more conservative, especially at `ε=0.02`, where timeouts are much more common.
 
-3. Then update the conclusion in Section 9 from:
-   - “the fixed-reference incomplete evidence supports the trend”
-   to:
-   - “the fixed-reference exact Step 4 evidence also supports the trend”
+So the full story can now be upgraded to:
+
+> Step 3 provides the exact main result under per-checkpoint refs;  
+> Step 4 provides the methodological correction under fixed refs;  
+> and `step4_marabou_v2` now pins down that fixed-ref story with exact verification and exact rejection.
