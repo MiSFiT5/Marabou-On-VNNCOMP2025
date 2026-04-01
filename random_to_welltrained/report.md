@@ -1,10 +1,10 @@
-# NAP Verification Story Report
+# NAP Verification from Random Initialzied to Well Trained
 
-This document is not a simple figure catalog. It is an English narrative version of the current experiment story, organized in a paper-like structure.  
+  
 The goal is not to list every figure, but to make the whole experimental chain easier to explain:
 
 1. how the models were trained;
-2. what the initial verification protocol was;
+2. what is verification on step 3
 3. why the reference-point logic had to be redesigned;
 4. what the fixed-reference results say after the redesign;
 5. what NAP changes beyond the verified rate itself;
@@ -21,13 +21,6 @@ This narrative report currently includes results from:
 - `generated/step4_unified_v2`
 - `generated/step4_marabou_v2`
 
-Therefore, in the story below:
-
-- Step 3 can be discussed using **Marabou exact** results;
-- Step 4 can now be discussed using both:
-  - **fixed-reference + auto_LiRPA** as a dense trend scanner for the `genuine / vacuous` structure;
-  - **fixed-reference + Marabou exact** for exact verify / genuine / rejection conclusions;
-- on the positive fixed refs, `step4_marabou_v2` now also provides an exact semantic split, although some cells still remain `semantic_unresolved`.
 
 ## 1. Act I: What Happens During Training?
 
@@ -49,23 +42,9 @@ The two key points here are:
 1. Track A and Track B both genuinely evolve from random initialization to well-trained models.
 2. All later Step 3 and Step 4 checkpoints are sampled from these trajectories, not chosen arbitrarily.
 
-### 1.2 About the TRADES Training Curve
 
-It is reasonable to want `Track A / Track B / TRADES` training curves in the same opening section.  
-However, the local workspace currently does not contain:
 
-- `generated/step2_cora_mnist_trades_a/history.csv`
-- `generated/step2_cora_mnist_trades_a/checkpoint_manifest.json`
-
-So this report cannot honestly draw the TRADES training-loss curve yet.  
-This is not an omission in interpretation; the source data simply has not been synchronized locally.
-
-The safest way to tell the story for now is:
-
-- use Track A and Track B in the training-curve section;
-- move TRADES to the later cross-training comparison section, where exact Step 3 results are already available.
-
-## 2. Act II: The Original Verification Protocol
+## 2. Act II: The Original Verification as Step 3
 
 ### 2.1 How the Original Reference Points Were Chosen
 
@@ -105,6 +84,10 @@ Not:
 
 ### 2.2 Step 3 Exact Main Result: Marabou
 
+In Step 3, The Reference Points are the first n samples with correcet prediction matched to their labels.
+ - so the reference points set are different in the 5 check points from the same training track
+ - so we have Step 4 as suggested last week -> a fixed reference pool that all reference point classied correctly by each checkpoint
+
 #### 2.2.1 Total Verified
 
 ![Step3 Marabou Total](story_step3_marabou_total_verified.png)
@@ -117,7 +100,7 @@ Data source:
 
 - `generated/step3_full/results/coverage.csv`
 
-I split the original line plot into two figures because the story becomes much clearer when these two quantities are separated:
+There are 2 figures on the verified rate:
 
 1. `total verified`
    means the total verified rate including vacuous cases;
@@ -133,6 +116,8 @@ The core narrative here should be:
 
 ### 2.3 Step 3 Incomplete Contrast: auto_LiRPA
 
+verifier autoLiRPA with interval propogation.
+
 #### 2.3.1 Total Verified
 
 ![Step3 auto_LiRPA Total](story_step3_auto_lirpa_total_verified.png)
@@ -145,10 +130,6 @@ Data source:
 
 - `generated/step3_auto_lirpa/results/coverage.csv`
 
-One point must be stated explicitly:
-
-- `step3_auto_lirpa` **does not reselect references**
-- it reuses the `reference_selection.json` from `step3_full`
 
 So these plots answer the following question:
 
@@ -159,24 +140,20 @@ The right story here is:
 - Marabou is the exact primary evidence;
 - auto_LiRPA is a faster trend scanner;
 - the two often agree in easy regions;
-- they diverge more in boundary regions.
 
-But the story must **not** be reversed into:
-
-- auto_LiRPA replaces the exact Marabou conclusion.
 
 ## 3. Act III: Why the Reference-Point Logic Had to Be Rebuilt
 
-### 3.1 Evolution of the Three Reference Protocols
+### 3.1 Evolution of the Three Reference experiments
 
-The story should be told like this:
 
 1. Step 3 uses per-checkpoint refs.  
    So it is well-suited to answer what happens on the 10 points that each checkpoint itself finds easiest to certify.
+   Which leads to the epoch 00 in 2.2.1 in the beginning with 100% verified rate.
 
 2. That is not enough, because if the points differ across checkpoints, we cannot separate “the model changed” from “the samples changed.”
 
-3. Therefore Step 4 moves to fixed references.
+3. Therefore Step 4 moves to fixed references as suggested last week.
 
 ### 3.2 The Problem in v1: `epoch_000` Pollutes the Intersection
 
@@ -469,6 +446,9 @@ This is more faithful for a Marabou-driven Section 6 than the previous auto_LiRP
 
 ### 6.2 Then Look at One Single Reference in Detail Under Marabou Exact
 
+- Vacuous means the reference point and its epsilon region rejected by NAP
+- Semantic unresolved means the vacuous verification reached time-out.
+
 ![Step4 Single Ref](story_step4_marabou_single_ref_deep_dive.png)
 
 Data sources:
@@ -481,33 +461,9 @@ This figure now uses `Track A, ref 10, digit 6, idx=11`, and shows the same ref 
 - `ε=0.01`, where the exact semantic contrast between methods is very clean;
 - `ε=0.02`, where the same ref becomes harder, but the three methods still separate clearly.
 
-This new version is intentionally simpler than the previous draft.
 
-Instead of asking the reader to jump between a status matrix and a separate runtime curve, it puts the exact answer in two aligned tables:
 
-1. The left panel shows the reference image itself.  
-   This keeps the discussion anchored to one concrete sample.
 
-2. The upper-right table gives, for `ε=0.01`, every `(method, checkpoint)` pair:
-   - the exact verdict;
-   - the Marabou solve time;
-   - and, for NAP, the number of added rules.
-
-3. The lower-right table gives the same layout for `ε=0.02`.  
-   This is the more difficult exact regime for the same ref, so it lets the reader compare not only semantics, but also where the solve becomes timeout-limited.
-
-This ref is better than the previous draft's example because it avoids collapsing the `ε=0.02` story into almost pure timeout behavior.
-
-More concretely, it shows:
-
-- at `ε=0.01`: baseline is genuinely verified, `α=0.95` stays vacuous, and `α=0.99` becomes genuinely verified after one early unresolved cell;
-- at `ε=0.02`: baseline keeps timing out, `α=0.95` turns vacuous from `50%` onward, and `α=0.99` still reaches genuine exact certificates from `50%` onward.
-
-This is easier to read because the exact tradeoff is now local to each cell:
-
-- the reader does not need to match a point in a curve back to a status label elsewhere;
-- the runtime is attached directly to the verdict it produced;
-- and the rule count is attached directly to the NAP setting that introduced it.
 
 So the single-reference Marabou story becomes:
 
@@ -515,27 +471,7 @@ So the single-reference Marabou story becomes:
 > but also whether the exact certificate is vacuous or genuinely non-empty,  
 > and how sharply the exact difficulty rises with epsilon.
 
-### 6.3 Why the Original Frontier Distribution Is No Longer the Main Figure
 
-The old frontier figure was not wrong.  
-It is still a valid reference-level distribution summary and remains useful in the full notebook.
-
-But for a story-driven report, it has two problems:
-
-1. It first requires the reader to understand a derived quantity:  
-   “what is the last still-genuine epsilon for a ref?”
-
-2. It collapses away object-level information.  
-   The reader cannot directly see:
-   - which refs are already gray at `epoch_000`;
-   - which refs are genuine;
-   - which refs are only vacuous;
-   - which exact sample changes at which checkpoint.
-
-So in this report, I removed the frontier distribution from the main narrative and replaced it with two object-level exact figures:
-
-- one figure for the Marabou timeline of the full fixed-ref set;
-- one figure for a Marabou deep dive into a single ref, including exact status and runtime.
 
 ## 7. Act VII: How Do the NAP Rules Themselves Change?
 
@@ -589,40 +525,19 @@ Data sources:
 - `generated/step3_seed42/results/coverage.csv`
 - `generated/step3_trades/results/coverage.csv`
 
-This section asks:
+This section takes the genunied verified rate. without vacuous check, all 3 models have higher verified rates.
 
-> Does the NAP gain disappear completely if we change the seed or the training recipe?
+## 9. Conlcusion
 
-The safest story at the moment is:
+1. With the Training progress, NAP do make efforts to make samples verifiable.
 
-- different runs do have different absolute numbers;
-- the baseline strength also differs across runs;
-- but the main small-radius NAP-vs-baseline trend is not completely overturned.
+2. More NAP rules (0.95 compare to 0.99), more vacuous cases.
 
-This means:
+3. NAP rejection works well (0.95 alpha better than 0.99)
 
-- the phenomenon is not an accident unique to `step3_full`;
-- it shows a meaningful degree of stability across seeds and training recipes.
+4. in late training progress(75% - 100%), the performence goes down (Not overfitting)
 
-## 9. The Strongest Current Story Conclusion
-
-Within the current data boundary, the strongest narrative chain is:
-
-1. Training continuously improves predictive performance, but verification behavior does not improve in a simple monotone way.
-2. The original Step 3 results already show that NAP can bring exact verified gain at small radii, especially `epsilon=0.01` and part of `0.02`.
-3. However, Step 3 uses per-checkpoint refs, so a sample-selection artifact cannot be fully ruled out there.
-4. This motivates the fixed-reference Step 4 design.
-5. `step4_unified_v2` shows that after correcting the ref logic and controlling the reference points, the NAP trend still remains visible.
-6. `step4_marabou_v2` further shows that on **the same fixed refs**, this trend is also supported by exact verification and exact rejection.
-7. At the same time, the late-training behavior looks more like:
-   - saturation in total rule count,
-   - continued change in rule composition and region geometry,
-   - continued redistribution between genuine and vacuous verification.
-
-
-> Step 3 provides the exact main result under per-checkpoint refs;  
-> Step 4 provides the methodological correction under fixed refs;  
-> and `step4_marabou_v2` now pins down that fixed-ref story with exact verification and exact rejection.
+5. in late training progress, we observe that basically only a few rules modified according to the similarity of the rules, in number, some ALWAYS_OFF disappeared and ALWAYS_ON came out. (section 7)
 
 
 # Notes
@@ -631,4 +546,5 @@ currently is still not fully complete
 
 ### Still Running
  - The experiments with Marabou step4 v2(fixed reference samples selected started from the correct samples after 25% training progress) -> estimated done today
- - [Queued] implications on this structure. -> estimated 3 to 4 days
+ - [Queued] Rejection Experiments on Marabou with a larger scale (larger epsilon)
+ - [Queued] implications on this structure. -> estimated 3 to 4 days or more.
