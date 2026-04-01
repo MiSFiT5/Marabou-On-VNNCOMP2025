@@ -25,9 +25,9 @@ Therefore, in the story below:
 
 - Step 3 can be discussed using **Marabou exact** results;
 - Step 4 can now be discussed using both:
-  - **fixed-reference + auto_LiRPA** for the `genuine / vacuous` decomposition;
-  - **fixed-reference + Marabou exact** for the final verify / rejection trend;
-- but on the positive fixed refs, the current exact path reports only `verified`, not a separate `genuine / vacuous` split.
+  - **fixed-reference + auto_LiRPA** as a dense trend scanner for the `genuine / vacuous` structure;
+  - **fixed-reference + Marabou exact** for exact verify / genuine / rejection conclusions;
+- on the positive fixed refs, `step4_marabou_v2` now also provides an exact semantic split, although some cells still remain `semantic_unresolved`.
 
 ## 1. Act I: What Happens During Training?
 
@@ -402,6 +402,9 @@ Data sources:
 - `generated/step4_marabou_v2/results/rejection_summary.csv`
 - `generated/step4_marabou_v2/results/rejection_all.csv`
 
+The x-axis here is the normalized training-progress axis used throughout this report.  
+So for Track A, `epoch_070` is shown at `100%`, not at raw epoch value `70`.
+
 These 400 exact rejection tasks are now complete.  
 Aggregated by `(alpha, epsilon)`, the exact results are:
 
@@ -424,82 +427,93 @@ In other words:
 
 ## 6. Act VI: What Do the Fixed References Themselves Look Like?
 
-### 6.1 First Look at the Whole Set of Fixed Refs
+### 6.1 First Look at the Whole Set of Fixed Refs Under Marabou Exact
 
-![Step4 Ref Gallery](story_step4_v2_ref_gallery_timeline.png)
+![Step4 Ref Gallery](story_step4_marabou_ref_gallery_timeline.png)
 
 Data sources:
 
 - `generated/step4_unified_v2/unified_refs.json`
-- `generated/step4_unified_v2/results/verify_all.csv`
+- `generated/step4_marabou_v2/results/verify_all.csv`
 
-This figure directly borrows the most storytelling-friendly display style from `vis_step4_claude.ipynb`:
+This keeps the same object-level display style as before, but the colored strips now come from `step4_marabou_v2`, not `step4_unified_v2`.
 
-- all 20 unified refs are shown directly as images;
-- each image has a five-segment color strip under it, corresponding to `0% → 25% → 50% → 75% → 100%`;
-- the displayed configuration is fixed to `Track A, NAP α=0.99, ε=0.01`.
+The displayed configuration is still fixed to `Track A, NAP α=0.99, ε=0.01`.
 
-Its main advantage is that the reader does **not** need to understand quantiles, IQR, or frontier epsilon first.  
-Instead, two key facts become visible immediately:
+This is important because the exact state space is now richer than the old auto_LiRPA picture:
+
+- gray: `misclassified`
+- green: exact `genuine`
+- yellow: exact `vacuous`
+- orange: exact `verified`, but the later `genuine / vacuous` split timed out
+- blue: `T/o`
+
+So the reader can still see the same 20 unified refs directly as images, but now with exact per-checkpoint states.
+
+Two key facts become visible immediately:
 
 1. Many refs are gray at `0%`.  
-   This is not a bug; it is exactly the design of `step4_unified_v2`:  
-   `epoch_000` is excluded from reference selection, but still kept during evaluation.  
-   So fixed refs are often `misclassified` at `epoch_000`.
+   This is still not a bug; it is a direct consequence of the `step4_unified_v2` selection logic:  
+   `epoch_000` is excluded from reference selection, but still kept during evaluation.
 
-2. The same ref set later splits into three different states:
-   - green: genuine verified
-   - yellow: vacuous verified
-   - red: not verified / unknown
+2. Later checkpoints no longer split only into `genuine` and `vacuous`.  
+   Some refs remain orange or blue.  
+   Orange means the exact verify stage already succeeded, but the follow-up exact `genuine / vacuous` split timed out;  
+   blue means the main exact solve itself timed out.
 
-This is much better for storytelling than the previous frontier-distribution figure, because here we can see:
+This is more faithful for a Marabou-driven Section 6 than the previous auto_LiRPA version, because here we can see:
 
 - which sample is changing;
 - at which checkpoint the change starts;
-- whether the change is genuine gain or vacuous gain.
+- whether the exact outcome is genuine, vacuous, unresolved, or timeout-limited.
 
-### 6.2 Then Look at One Single Reference in Detail
+### 6.2 Then Look at One Single Reference in Detail Under Marabou Exact
 
-![Step4 Single Ref](story_step4_v2_single_ref_deep_dive.png)
+![Step4 Single Ref](story_step4_marabou_single_ref_deep_dive.png)
 
 Data sources:
 
 - `generated/step4_unified_v2/unified_refs.json`
-- `generated/step4_unified_v2/results/verify_all.csv`
+- `generated/step4_marabou_v2/results/verify_all.csv`
 
-This figure uses `Track A, ref 6, digit 4, idx=6`.  
-It was not chosen because it is visually convenient, but because it exposes three distinct mechanisms at the same time:
+This figure now uses `Track A, ref 10, digit 6, idx=11`, and shows the same ref under **two epsilon settings**:
 
-- baseline: never truly crosses `0`, so robustness is never certified;
-- `α=0.95`: becomes vacuous from `25%` onward;
-- `α=0.99`: is vacuous at `25%`, then becomes genuinely verified from `50%` onward.
+- `ε=0.01`, where the exact semantic contrast between methods is very clean;
+- `ε=0.02`, where the same ref becomes harder, but the three methods still separate clearly.
 
-From top to bottom, the figure tells a three-layer story:
+This new version is intentionally simpler than the previous draft.
 
-1. The top-left panel shows the reference itself.  
-   This grounds the discussion in a concrete digit instead of an abstract ID.
+Instead of asking the reader to jump between a status matrix and a separate runtime curve, it puts the exact answer in two aligned tables:
 
-2. The top-middle panel shows the pixel-wise budget for `ε=0.01`.  
-   It reminds the reader that the verifier is actually working over a clipped input box in `[0,1]`, not over an abstract scalar radius alone.
+1. The left panel shows the reference image itself.  
+   This keeps the discussion anchored to one concrete sample.
 
-3. The top-right panel is a method-by-checkpoint status matrix.  
-   This turns the line plot into a state table:  
-   `mis / ? / V / Y` make it immediately visible how the same ref evolves under different methods.
+2. The upper-right table gives, for `ε=0.01`, every `(method, checkpoint)` pair:
+   - the exact verdict;
+   - the Marabou solve time;
+   - and, for NAP, the number of added rules.
 
-4. The bottom panel is the lower-bound trajectory.  
-   This is the panel that actually explains *why* a case moves from not verified to verified.  
-   For genuine points, we care about whether the `min lower bound` crosses `0`;  
-   for vacuous points, we mark them with stars instead of inventing a fake numeric value.
+3. The lower-right table gives the same layout for `ε=0.02`.  
+   This is the more difficult exact regime for the same ref, so it lets the reader compare not only semantics, but also where the solve becomes timeout-limited.
 
-This single-reference figure is better for storytelling than an aggregate curve when you want to say:
+This ref is better than the previous draft's example because it avoids collapsing the `ε=0.02` story into almost pure timeout behavior.
 
-> NAP does not only change the verified rate; it also changes *how* verification becomes true.
+More concretely, it shows:
 
-More concretely:
+- at `ε=0.01`: baseline is genuinely verified, `α=0.95` stays vacuous, and `α=0.99` becomes genuinely verified after one early unresolved cell;
+- at `ε=0.02`: baseline keeps timing out, `α=0.95` turns vacuous from `50%` onward, and `α=0.99` still reaches genuine exact certificates from `50%` onward.
 
-- sometimes it makes a previously negative lower bound become positive, yielding genuine verification;
-- sometimes it makes the local region itself become empty, yielding vacuous verification;
-- both cases are counted as `verified` in aggregate plots, but their semantics are very different.
+This is easier to read because the exact tradeoff is now local to each cell:
+
+- the reader does not need to match a point in a curve back to a status label elsewhere;
+- the runtime is attached directly to the verdict it produced;
+- and the rule count is attached directly to the NAP setting that introduced it.
+
+So the single-reference Marabou story becomes:
+
+> comparing `ε=0.01` and `ε=0.02` on the same fixed ref shows not only whether NAP verifies,  
+> but also whether the exact certificate is vacuous or genuinely non-empty,  
+> and how sharply the exact difficulty rises with epsilon.
 
 ### 6.3 Why the Original Frontier Distribution Is No Longer the Main Figure
 
@@ -518,10 +532,10 @@ But for a story-driven report, it has two problems:
    - which refs are only vacuous;
    - which exact sample changes at which checkpoint.
 
-So in this report, I removed the frontier distribution from the main narrative and replaced it with two figures closer to `vis_step4_claude.ipynb`:
+So in this report, I removed the frontier distribution from the main narrative and replaced it with two object-level exact figures:
 
-- one figure for the object-level timeline of the full fixed-ref set;
-- one figure for a deep dive into a single ref.
+- one figure for the Marabou timeline of the full fixed-ref set;
+- one figure for a Marabou deep dive into a single ref, including exact status and runtime.
 
 ## 7. Act VII: How Do the NAP Rules Themselves Change?
 
@@ -605,38 +619,16 @@ Within the current data boundary, the strongest narrative chain is:
    - continued change in rule composition and region geometry,
    - continued redistribution between genuine and vacuous verification.
 
-## 10. What We Still Must Not Overclaim
-
-There are three places where the story still has to remain disciplined:
-
-1. We must not interpret all exact Step 4 verified gains as genuine region expansion.  
-   On the positive fixed refs, `step4_marabou_v2` currently reports `verified`, but does not independently split `genuine` from `vacuous`.
-
-2. We must not directly compare absolute verified percentages between Step 3 and Step 4.  
-   Their reference bases are different:
-   - Step 3: per-checkpoint refs
-   - Step 4: fixed unified refs
-
-3. We must not claim that late-training overconfidence has already been fully proven.  
-   The safer wording is still:
-   - late training appears to involve changes in region geometry and vacuity behavior;
-   - this is compatible with an overconfidence tendency;
-   - but the current evidence is still about geometry/vacuity behavior, not a completed causal proof.
-
-## 11. What `step4_marabou_v2` Changes Now
-
-Now that `step4_marabou_v2` is complete, the most important upgrades to the story are:
-
-1. The fixed-reference trend can now be described as:
-   - `auto_LiRPA` first exposes the `genuine / vacuous` structure;
-   - `Marabou exact` then confirms that the fixed-ref trend is not an incomplete-verification illusion.
-
-2. The rejection story can now also be stated as an exact conclusion:
-   - `α=0.95` is more aggressive and rejects more strongly;
-   - `α=0.99` is more conservative, especially at `ε=0.02`, where timeouts are much more common.
-
-So the full story can now be upgraded to:
 
 > Step 3 provides the exact main result under per-checkpoint refs;  
 > Step 4 provides the methodological correction under fixed refs;  
 > and `step4_marabou_v2` now pins down that fixed-ref story with exact verification and exact rejection.
+
+
+# Notes
+
+currently is still not fully complete
+
+### Still Running
+ - The experiments with Marabou step4 v2(fixed reference samples selected started from the correct samples after 25% training progress) -> estimated done today
+ - [Queued] implications on this structure. -> estimated 3 to 4 days
