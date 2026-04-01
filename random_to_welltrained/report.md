@@ -169,10 +169,6 @@ But the story must **not** be reversed into:
 
 ### 3.1 Evolution of the Three Reference Protocols
 
-![Reference Protocols](fig00_reference_protocols.png)
-
-This is one of the key figures for understanding the whole experiment chain.
-
 The story should be told like this:
 
 1. Step 3 uses per-checkpoint refs.  
