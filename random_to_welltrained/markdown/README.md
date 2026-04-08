@@ -59,6 +59,7 @@ Since the refs are chosen to be correct for checkpoints at 25%+, `epoch_000` (ra
 ## Reports
 
 - **[Step4_All_Tracks_Aggregated.md](Step4_All_Tracks_Aggregated.md)** — Full results tables, solver comparison, rejection
+- **[Step4_Implication_Families_Exact.md](Step4_Implication_Families_Exact.md)** — Unary vs implication vs compressed exact data tables
 
 ### Per-Track Reports
 

@@ -26,18 +26,24 @@ METHOD_ORDER = [
     "Unary ON/OFF",
     "Implication L4L5",
     "Implication L4L5+L5L6",
+    "Compressed L0L6 c=0.95",
+    "Compressed L0L6 c=0.99",
 ]
 METHOD_COLORS = {
     "Baseline": "#111111",
     "Unary ON/OFF": "#1f77b4",
     "Implication L4L5": "#d55e00",
     "Implication L4L5+L5L6": "#009e73",
+    "Compressed L0L6 c=0.95": "#cc79a7",
+    "Compressed L0L6 c=0.99": "#7f3c8d",
 }
 METHOD_MARKERS = {
     "Baseline": "o",
     "Unary ON/OFF": "s",
     "Implication L4L5": "^",
     "Implication L4L5+L5L6": "D",
+    "Compressed L0L6 c=0.95": "P",
+    "Compressed L0L6 c=0.99": "X",
 }
 
 PROGRESS_BY_CHECKPOINT = {
@@ -131,8 +137,45 @@ def load_positive_results() -> pd.DataFrame:
         ],
         ignore_index=True,
     )
+    compressed_095 = pd.concat(
+        [
+            _normalize_positive_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_A_compressed_conf0.95" / "results" / "coverage.csv"
+                ),
+                "Compressed L0L6 c=0.95",
+            ),
+            _normalize_positive_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_B_compressed_conf0.95" / "results" / "coverage.csv"
+                ),
+                "Compressed L0L6 c=0.95",
+            ),
+        ],
+        ignore_index=True,
+    )
+    compressed_099 = pd.concat(
+        [
+            _normalize_positive_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_A_compressed_conf0.99" / "results" / "coverage.csv"
+                ),
+                "Compressed L0L6 c=0.99",
+            ),
+            _normalize_positive_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_B_compressed_conf0.99" / "results" / "coverage.csv"
+                ),
+                "Compressed L0L6 c=0.99",
+            ),
+        ],
+        ignore_index=True,
+    )
 
-    out = pd.concat([baseline, unary, l4l5, l4l5_l5l6], ignore_index=True)
+    out = pd.concat(
+        [baseline, unary, l4l5, l4l5_l5l6, compressed_095, compressed_099],
+        ignore_index=True,
+    )
     out = out[out["epsilon"].isin(EPSILONS)].copy()
     return out
 
@@ -168,7 +211,41 @@ def load_rejection_results() -> pd.DataFrame:
         ],
         ignore_index=True,
     )
-    out = pd.concat([unary, l4l5, l4l5_l5l6], ignore_index=True)
+    compressed_095 = pd.concat(
+        [
+            _normalize_rejection_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_A_compressed_conf0.95" / "results" / "rejection_summary.csv"
+                ),
+                "Compressed L0L6 c=0.95",
+            ),
+            _normalize_rejection_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_B_compressed_conf0.95" / "results" / "rejection_summary.csv"
+                ),
+                "Compressed L0L6 c=0.95",
+            ),
+        ],
+        ignore_index=True,
+    )
+    compressed_099 = pd.concat(
+        [
+            _normalize_rejection_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_A_compressed_conf0.99" / "results" / "rejection_summary.csv"
+                ),
+                "Compressed L0L6 c=0.99",
+            ),
+            _normalize_rejection_frame(
+                _read_csv(
+                    GENERATED_ROOT / "step4_implication_B_compressed_conf0.99" / "results" / "rejection_summary.csv"
+                ),
+                "Compressed L0L6 c=0.99",
+            ),
+        ],
+        ignore_index=True,
+    )
+    out = pd.concat([unary, l4l5, l4l5_l5l6, compressed_095, compressed_099], ignore_index=True)
     out = out[out["epsilon"].isin(EPSILONS)].copy()
     return out
 
@@ -265,7 +342,7 @@ def render_positive_figure(df: pd.DataFrame, value_col: str, output_name: str, y
                 y_label=y_label,
             )
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 1.01))
+    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.04))
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     fig.savefig(OUT_DIR / output_name, bbox_inches="tight")
     plt.close(fig)
@@ -297,7 +374,7 @@ def render_rejection_figure(df: pd.DataFrame, output_name: str) -> None:
                 y_label="Rejection Rate (%)",
             )
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.01))
+    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 1.04))
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     fig.savefig(OUT_DIR / output_name, bbox_inches="tight")
     plt.close(fig)

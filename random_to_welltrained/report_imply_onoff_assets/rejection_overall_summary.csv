@@ -1,10 +1,18 @@
 method,alpha,epsilon,mean_rejection_rate,total_timeout,alpha_label
+Compressed L0L6 c=0.95,0.95,0.01,45.0,43,0.95
+Compressed L0L6 c=0.95,0.99,0.01,42.5,45,0.99
+Compressed L0L6 c=0.99,0.95,0.01,35.0,48,0.95
+Compressed L0L6 c=0.99,0.99,0.01,35.0,48,0.99
 Implication L4L5,0.95,0.01,65.0,27,0.95
 Implication L4L5,0.99,0.01,56.25,34,0.99
 Implication L4L5+L5L6,0.95,0.01,66.25,27,0.95
 Implication L4L5+L5L6,0.99,0.01,58.75,33,0.99
 Unary ON/OFF,0.95,0.01,100.0,0,0.95
 Unary ON/OFF,0.99,0.01,95.0,4,0.99
+Compressed L0L6 c=0.95,0.95,0.02,0.0,72,0.95
+Compressed L0L6 c=0.95,0.99,0.02,0.0,69,0.99
+Compressed L0L6 c=0.99,0.95,0.02,0.0,61,0.95
+Compressed L0L6 c=0.99,0.99,0.02,0.0,65,0.99
 Implication L4L5,0.95,0.02,1.25,79,0.95
 Implication L4L5,0.99,0.02,0.0,80,0.99
 Implication L4L5+L5L6,0.95,0.02,1.25,79,0.95
