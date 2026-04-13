@@ -319,6 +319,20 @@ The main visual takeaways are:
 - under `α=0.99, ε=0.02`, they also agree closely;
 - under `α=0.95, ε=0.01`, exact genuine is clearly lower than auto_LiRPA genuine, showing that the exact vacuity decomposition is stricter here.
 
+### 4.6 Follow-up: Which Unary ON/OFF Layers Carry the Signal?
+
+A later follow-up isolates the unary `ALWAYS_ON / ALWAYS_OFF` rule set by layer. Instead of always using the full `L0-L6` rule set, it evaluates `last1` through `last7`, where `last1` uses only `L6` and `last7` uses all layers.
+
+The short result is:
+
+- at `eps=0.01`, `alpha=0.99`, the final layer alone is already strong: `last1` reaches `18/18/2/0` on Track A final and `20/20/0/0` on Track B final, where the cell format is `genuine / verified / timeout / misclassified`;
+- at `eps=0.01`, `alpha=0.95`, the all-layer `last7` result is inflated by vacuity: Track A final is `9/19/1/0`, and Track B final is `10/20/0/0`;
+- at `eps=0.02`, the result is mainly timeout-limited rather than adversarial-dominated, and mid-to-late layer sets such as `last4` can help.
+
+Detailed checkpoint tables and figures are in:
+
+- [`markdown/Step4_Unary_Layer_Ablation.md`](markdown/Step4_Unary_Layer_Ablation.md)
+
 ## 5. Act V: What Does NAP Do to Misclassified Samples?
 
 ### 5.1 Misclassified-Sample Rejection
@@ -401,6 +415,21 @@ In other words:
 
 > the Step 4 rejection story does not only hold under incomplete verification;  
 > it is now also largely confirmed by exact Marabou.
+
+### 5.4 Follow-up: Direct Rejection and Pairwise Class-NAP Separation
+
+The later rejection follow-up separates two questions that the older local-region rejection experiment mixed together:
+
+1. whether different class-specific full-layer unary NAPs can overlap in the bounded MNIST input domain `[0,1]^784`;
+2. whether a misclassified sample itself satisfies the NAP of its true class.
+
+The pairwise class-NAP experiment shows a strong training-progress pattern: at random initialization, all class pairs overlap; after training begins, the class-pair intersections become almost entirely disjoint, and from 50% training onward all resolved pairs are disjoint in both tracks and both alpha settings.
+
+The direct pointwise rejection experiment gives the cleaner rejection interpretation. At `alpha=0.99`, trained NAPs reject `98.4-100.0%` of misclassified samples under the true-class NAP, while rejecting `15.6-22.2%` of correctly classified samples. By contrast, `alpha=0.95` also rejects almost all misclassified samples, but it rejects too many correctly classified samples as well.
+
+Detailed tables and figures are in:
+
+- [`markdown/Step4_NAP_Rejection_Evidence.md`](markdown/Step4_NAP_Rejection_Evidence.md)
 
 ## 6. Act VI: What Do the Fixed References Themselves Look Like?
 
@@ -533,7 +562,7 @@ This section takes the genunied verified rate. without vacuous check, all 3 mode
 
 2. More NAP rules (0.95 compare to 0.99), more vacuous cases.
 
-3. NAP rejection works well (0.95 alpha better than 0.99)
+3. For the newer direct pointwise rejection check, `alpha=0.99` is the cleaner setting: it rejects almost all misclassified samples after training while rejecting far fewer correctly classified samples than `alpha=0.95`.
 
 4. in late training progress(75% - 100%), the performence goes down (Not overfitting)
 

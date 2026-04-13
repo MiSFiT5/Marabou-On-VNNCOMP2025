@@ -60,6 +60,8 @@ Since the refs are chosen to be correct for checkpoints at 25%+, `epoch_000` (ra
 
 - **[Step4_All_Tracks_Aggregated.md](Step4_All_Tracks_Aggregated.md)** — Full results tables, solver comparison, rejection
 - **[Step4_Implication_Families_Exact.md](Step4_Implication_Families_Exact.md)** — Unary vs implication vs compressed exact data tables
+- **[Step4_NAP_Rejection_Evidence.md](Step4_NAP_Rejection_Evidence.md)** — Follow-up rejection evidence: pairwise class-NAP separation and direct pointwise rejection of misclassified samples
+- **[Step4_Unary_Layer_Ablation.md](Step4_Unary_Layer_Ablation.md)** — Follow-up last-n layer ablation for unary ALWAYS_ON / ALWAYS_OFF NAP rules
 
 ### Per-Track Reports
 
@@ -96,6 +98,18 @@ Under the same 20 refs across all checkpoints, NAP still shows clear verified ga
 
 NAP consistently rejects (vacuous) local regions around misclassified samples, with rejection rates increasing with training progress. This is confirmed by both auto_LiRPA and Marabou exact.
 
-### 4. auto_LiRPA vs Marabou Agreement
+### 4. Follow-up: Direct Rejection and Pairwise Class-NAP Separation
+
+The newer rejection follow-up separates two questions that were previously mixed together. First, pairwise class-NAP checks show that full-layer unary class NAPs become mutually inconsistent in the bounded MNIST input domain `[0,1]^784`: random-init class NAPs all overlap, while trained class pairs become almost entirely disjoint by 25% training and fully disjoint after 50% training. Second, direct pointwise checks show that trained `alpha=0.99` NAPs reject 98.4-100.0% of misclassified samples under the true-class NAP, while rejecting 15.6-22.2% of correctly classified samples.
+
+See [Step4_NAP_Rejection_Evidence.md](Step4_NAP_Rejection_Evidence.md).
+
+### 5. Follow-up: Last-n Layer Ablation for Unary NAP
+
+The layer-ablation follow-up shows that the small-radius unary ON/OFF signal is concentrated in the final layers. At `eps=0.01`, `alpha=0.99`, using only `last1` (`L6`) already reaches `18/18/2/0` on Track A final and `20/20/0/0` on Track B final, where the cell format is `genuine / verified / timeout / misclassified`. In contrast, full-layer `last7` at `alpha=0.95` is inflated by vacuity: Track A final is `9/19/1/0`, and Track B final is `10/20/0/0`. At `eps=0.02`, the result is timeout-limited rather than adversarial-dominated.
+
+See [Step4_Unary_Layer_Ablation.md](Step4_Unary_Layer_Ablation.md).
+
+### 6. auto_LiRPA vs Marabou Agreement
 
 Baseline genuine results are close between the two solvers. For NAP, auto_LiRPA tends to be more optimistic than Marabou exact, especially for alpha=0.95 at eps=0.01.
