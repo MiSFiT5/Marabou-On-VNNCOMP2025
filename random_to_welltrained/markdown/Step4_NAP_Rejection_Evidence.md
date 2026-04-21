@@ -176,9 +176,9 @@ Data sources:
 - `Random_Initialized_NN/generated/nap_generalization_alpha_sweep/results/pairwise_summary.csv`
 - `Random_Initialized_NN/generated/nap_generalization_early_0_25_alpha_sweep/results/pairwise_summary.csv`
 
-The figure below stacks `overlap` (solver-proved SAT) and `timeout` per model for `alpha=0.99`. Each stack can reach up to `45` pairs. A zero bar means "no proven overlap and no timeout left", i.e. all 45 pairs are solver-proved disjoint. Missing entries are not plotted; the tables mark the few missing cases explicitly.
+The figure below shows only `overlap` pairs, i.e. class pairs for which Marabou returned SAT and therefore proved that the two class-NAP regions intersect. Each model has 45 possible class pairs. Lower is better; zero means no solver-proved overlap remains. Timeout cases are not mixed into the plot and are reported separately in the tables below.
 
-![Pairwise overlap vs timeout per model, alpha=0.99](step4_followup_assets/cross_model_pairwise_overlap_alpha099.png)
+![Solver-proved pairwise class-NAP overlap, alpha=0.99](step4_followup_assets/cross_model_pairwise_overlap_lines_alpha099.png)
 
 ### Aggregate across all 5 models (225 pairs per cell), `alpha=0.99`
 
