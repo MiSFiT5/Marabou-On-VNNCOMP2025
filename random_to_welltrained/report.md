@@ -321,13 +321,14 @@ The main visual takeaways are:
 
 ### 4.6 Follow-up: Which Unary ON/OFF Layers Carry the Signal?
 
-A later follow-up isolates the unary `ALWAYS_ON / ALWAYS_OFF` rule set by layer. Instead of always using the full `L0-L6` rule set, it evaluates `last1` through `last7`, where `last1` uses only `L6` and `last7` uses all layers. The report now uses the 2700s high-timeout re-run for `eps=0.02`.
+A later follow-up isolates the unary `ALWAYS_ON / ALWAYS_OFF` rule set by layer. Instead of always using the full `L0-L6` rule set, it evaluates `last1` through `last7`, where `last1` uses only `L6` and `last7` uses all layers. The report uses the 600s full ablation run for all epsilon values.
 
 The short result is:
 
-- at `alpha=0.95`, deeper configs are clearly stronger at `eps=0.02`: Track A final improves from `3/3/17` on `last1` to `9/9/11` on `last5`, while Track B reaches `15/15/5` on `last5` and `15/17/3` on `last7`;
-- at `alpha=0.99`, the same direction is weaker but still visible: Track B final goes from `4/4/16` on `last1` to `8/8/12` on `last7`;
-- full-layer `last7` can still contain vacuous proofs at `alpha=0.95`, so genuine verified remains the safer metric than total verified.
+- at `eps=0.01`, `alpha=0.99`, using only the final layer is already close to the full-layer configuration: final `last1` reaches `18/18/2` on Track A and `20/20/0` on Track B;
+- at `eps=0.01`, `alpha=0.95`, full-layer `last7` is misleading if vacuous proofs are counted: final genuine is only `9/20` on Track A and `10/20` on Track B;
+- at `eps=0.02`, the result is timeout-limited under the 600s disjunctive encoding. Mid-to-late layer subsets can help, but the evidence is weaker than at `eps=0.01`;
+- at `eps=0.05`, no layer configuration gives useful verified or genuine mass.
 
 Detailed checkpoint tables and figures are in:
 
@@ -335,16 +336,17 @@ Detailed checkpoint tables and figures are in:
 
 ### 4.7 Follow-up: Runtime Profile of the Ablation Tasks
 
-The 2700s high-timeout re-run has 2799 recorded verification-task JSONs. Excluding the 420 `misclassified` tasks at `epoch_000`, verified proofs have median runtime `36.50s`, while timeout cases run to the budget with median runtime `2703.54s`.
+The 600s full ablation run has 8397 recorded verification-task JSONs. Excluding `misclassified` rows, which are skipped before Marabou solving and record zero runtime, the solver-executed tasks contain 2526 UNSAT proofs and 4611 timeouts. No SAT/adversarial result was returned by the 600s layer-ablation queries.
 
-This has two reading consequences:
+This has three reading consequences:
 
-- The remaining unresolved cases in the 2700s run are still solver timeouts, not adversarial SAT results.
-- More layers reduce timeout count overall, but this must still be read together with vacuity, especially for `alpha=0.95`.
+- Verified/UNSAT proofs are usually fast once solved: per-checkpoint/per-alpha medians are mostly around `7-12s`.
+- The overall per-checkpoint/per-alpha medians are close to `600s` because timeout cases dominate the unresolved mass.
+- Since SAT count is zero in this run, the SAT mean and median are undefined rather than zero.
 
-Detailed runtime tables and figures are in:
+The detailed runtime table is in:
 
-- [`markdown/Step4_Unary_Layer_Ablation.md`](markdown/Step4_Unary_Layer_Ablation.md) (Section 5)
+- [`markdown/Step4_Unary_Layer_Ablation.md`](markdown/Step4_Unary_Layer_Ablation.md) (Section 8)
 
 ## 5. Act V: What Does NAP Do to Misclassified Samples?
 
@@ -607,7 +609,7 @@ This section takes the genunied verified rate. without vacuous check, all 3 mode
 
 6. The rejection and class-separation phenomena are not specific to Track A / Track B. Across three `7x250` seeds the direct-rejection rate at `alpha=0.99` is consistent (about `93-97%` from 25% onward), and no solver-proved pairwise class-NAP overlap remains by epoch 20 in all three. The same direction holds for smaller `4x250` and narrower `7x100` networks, but with weaker strength and delayed emergence — solver-proved overlap only reaches zero around epoch 75, and residual timeout cases remain unresolved. The effect is a property of training, not of a single seed or architecture.
 
-7. In the 2700s layer-ablation re-run, unresolved cases are still timeout-dominated. Verified proofs have median runtime `36.50s`, while timeout cases have median runtime `2703.54s`. The main layer result is that mid-to-late NAP layers help at `eps=0.02`, but `alpha=0.95` must still be checked for vacuity.
+7. In the 600s layer-ablation run, unresolved cases are timeout-dominated. Verified/UNSAT proofs are usually much faster, with per-checkpoint/per-alpha medians mostly around `7-12s`, while overall medians stay near the 600s timeout budget. No SAT result was returned by the layer-ablation queries under this encoding and timeout.
 
 
 # Notes
