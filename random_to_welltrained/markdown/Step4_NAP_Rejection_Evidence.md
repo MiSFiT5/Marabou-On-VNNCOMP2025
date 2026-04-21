@@ -108,16 +108,123 @@ So the cleaner rejection conclusion is:
 
 > After training, unary NAP constraints become highly inconsistent with misclassified samples. The useful rejection setting is closer to `alpha=0.99`, because `alpha=0.95` rejects too many correctly classified samples as well.
 
+## 1.3 Cross-seed and Cross-architecture Direct Rejection
+
+The two experiments above use Track A and Track B, which are two training runs of the same `7x250` architecture. A natural follow-up question is whether the direct rejection phenomenon depends on the random seed or on the network architecture.
+
+This section uses a separate sweep that covers five models:
+
+| Run key | Seed | Hidden layers | Hidden width |
+| --- | --- | --- | --- |
+| `seed0_7x250` | 0 | 7 | 250 |
+| `seed42_7x250` | 42 | 7 | 250 |
+| `seed123_7x250` | 123 | 7 | 250 |
+| `seed0_4x250` | 0 | 4 | 250 |
+| `seed0_7x100` | 0 | 7 | 100 |
+
+For each model, the same direct rejection check is evaluated at progress 0%, 25%, 50%, 75%, 100% (full sweep), and additionally at epochs 5, 10, 15, 20, 25 (early sweep) to resolve the random-init to 25%-training transition.
+
+The rejection metric here is `mis_rej_pred_pct`, i.e. the fraction of misclassified samples that violate the NAP of the **predicted** class. This matches the practical rejection scenario where the true label is unknown at inference.
+
+Data sources:
+
+- `Random_Initialized_NN/generated/nap_generalization_alpha_sweep/results/direct_rejection_summary.csv`
+- `Random_Initialized_NN/generated/nap_generalization_early_0_25_alpha_sweep/results/direct_rejection_summary.csv`
+
+![Cross-model direct rejection, alpha=0.99, 25-100](step4_followup_assets/cross_model_direct_rejection_alpha099.png)
+
+![Cross-model direct rejection, alpha=0.99, epoch 0-25](step4_followup_assets/cross_model_direct_rejection_early.png)
+
+### Full sweep, alpha=0.99
+
+| Model | 25% pred-rej | 50% | 75% | 100% | 25% correct-rej | 50% | 75% | 100% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `seed0_7x250` | 96.12% | 98.60% | 98.23% | 97.62% | 16.61% | 20.93% | 22.04% | 22.20% |
+| `seed42_7x250` | 93.89% | 94.79% | 95.60% | 95.46% | 19.05% | 20.48% | 22.31% | 21.92% |
+| `seed123_7x250` | 92.86% | 95.85% | 95.38% | 96.51% | 17.35% | 19.28% | 21.42% | 21.05% |
+| `seed0_4x250` | 88.06% | 94.30% | 96.95% | 96.89% | 14.01% | 17.16% | 19.39% | 19.09% |
+| `seed0_7x100` | 78.89% | 91.05% | 90.73% | 92.45% | 9.89% | 10.29% | 11.26% | 11.23% |
+
+### Early sweep, alpha=0.99 (epoch 0-25)
+
+| Model | epoch 0 | 5 | 10 | 15 | 20 | 25 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `seed0_7x250` | 77.66% | 75.60% | 91.73% | 93.18% | 94.05% | 96.26% |
+| `seed42_7x250` | 72.69% | 85.64% | 90.04% | 93.86% | 94.42% | 93.89% |
+| `seed123_7x250` | 71.89% | 73.46% | 90.17% | 92.89% | 94.47% | 92.86% |
+| `seed0_4x250` | 60.83% | 77.10% | 84.35% | 89.00% | 92.23% | 88.06% |
+| `seed0_7x100` | 69.55% | 48.57% | 61.82% | 68.81% | 75.00% | 78.89% |
+
+Takeaways:
+
+- Across three `7x250` seeds, predicted-class rejection is consistent: after 25% training, all three sit in the `92.9%-96.3%` band, and from 50% onward in the `94.8%-98.6%` band.
+- The smaller `4x250` network starts lower at 25% (`88.1%`) but catches up by 75%-100%, where it matches the `7x250` band.
+- The narrower `7x100` network is visibly weaker at every stage: at 25% only `78.9%`, and at 100% still `92.5%`, below any `7x250` seed.
+- In the early sweep, the `7x250` models take the main jump between epoch 5 and epoch 10 (from roughly `75-85%` to about `90%`), and stabilize by epoch 15-20. `4x250` follows the same shape but later; `7x100` is slower and still climbing at epoch 25.
+- Correct-sample rejection shows a smaller but related pattern: `7x250` carries a `16-22%` false-rejection rate at alpha=0.99, `4x250` sits at `14-19%`, and `7x100` at `10-11%`. This confirms that `alpha=0.99` is a consistency/anomaly signal rather than a zero-false-positive acceptance rule, and that the trade-off changes with architecture.
+
+A single-line summary:
+
+> After 25% training, predicted-class NAP rejection is consistent across 7x250 seeds at about 93-97%. The same phenomenon appears across architectures, but with weaker strength for 7x100 and delayed emergence for 4x250.
+
+## 1.4 Cross-seed and Cross-architecture Pairwise Overlap
+
+The pairwise experiment is extended to the same five models. To make the evolution visible across the whole trajectory, the 0-25 early sweep and the 25-100 full sweep are combined.
+
+Data sources:
+
+- `Random_Initialized_NN/generated/nap_generalization_alpha_sweep/results/pairwise_summary.csv`
+- `Random_Initialized_NN/generated/nap_generalization_early_0_25_alpha_sweep/results/pairwise_summary.csv`
+
+The figure below stacks `overlap` (solver-proved SAT) and `timeout` per model for `alpha=0.99`. Each stack can reach up to `45` pairs. A zero bar means "no proven overlap and no timeout left", i.e. all 45 pairs are solver-proved disjoint. Missing entries are not plotted; the tables mark the few missing cases explicitly.
+
+![Pairwise overlap vs timeout per model, alpha=0.99](step4_followup_assets/cross_model_pairwise_overlap_alpha099.png)
+
+### Aggregate across all 5 models (225 pairs per cell), `alpha=0.99`
+
+| Progress | overlap / 225 | timeout / 225 | disjoint / 225 |
+| ---: | ---: | ---: | ---: |
+| 0 | 225 | 0 | 0 |
+| 5 | 123 | 48 | 54 |
+| 10 | 79 | 69 | 77 |
+| 15 | 70 | 40 | 114 (+1 missing) |
+| 20 | 56 | 31 | 138 |
+| 25 | 52 | 25 | 148 |
+| 50 | 8 | 50 | 167 |
+| 75 | 0 | 31 | 194 |
+| 100 | 0 | 31 | 190 (+4 missing) |
+
+### Per-model overlap / timeout, `alpha=0.99` (out of 45 pairs)
+
+| Model | 0 | 5 | 10 | 15 | 20 | 25 | 50 | 75 | 100 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `seed0_7x250` | 45 / 0 | 17 / 10 | 1 / 18 | 0 / 5 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `seed42_7x250` | 45 / 0 | 12 / 11 | 3 / 17 | 0 / 9 | 0 / 2 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `seed123_7x250` | 45 / 0 | 16 / 20 | 5 / 23 | 1 / 15 | 0 / 7 | 0 / 2 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `seed0_4x250` | 45 / 0 | 44 / 1 | 38 / 6 | 42 / 1 (+1 missing) | 35 / 9 | 32 / 12 | 5 / 31 | 0 / 28 | 0 / 26 (+4 missing) |
+| `seed0_7x100` | 45 / 0 | 34 / 6 | 32 / 5 | 27 / 10 | 21 / 13 | 20 / 11 | 3 / 19 | 0 / 3 | 0 / 5 |
+
+Takeaways:
+
+- For the three `7x250` models, class-NAP overlap vanishes very early. All three have zero solver-proved overlap from epoch 20 onward at `alpha=0.99`.
+- For `4x250` and `7x100`, overlap persists much further into training. Both still have nonzero overlap at epoch 50 (5 and 3 pairs respectively) and only have zero solver-proved overlap by epoch 75.
+- Even at 75%-100% training, `4x250` and `7x100` still carry timeout pairs. `timeout` is not the same as `overlap`; it means the solver did not decide, not that overlap exists. The correct claim is "no proven overlap", not "all pairs proven disjoint".
+- For `alpha=0.95` (stricter NAP), solver-proved overlap reaches zero faster across all models: the aggregate is 4/225 at 25% and 0/225 from 50% onward. This is expected, since a stricter NAP region is smaller and easier to prove disjoint, but must be read together with the higher correct-sample rejection rate reported in the direct rejection checks above.
+
+A single-line summary:
+
+> For 7x250 networks, no solver-proved class-NAP overlap remains by epoch 20 at alpha=0.99. For smaller or narrower networks, overlap persists through epoch 50 and only reaches zero solver-proved overlap by epoch 75, with some timeout cases still unresolved.
+
 ## Combined Reading
 
-The two rejection experiments support the same training-progress story from different angles.
+The four sub-experiments above support the same training-progress story from different angles.
 
-Pairwise separation says:
+Pairwise separation, including the cross-model extension, says:
 
-> different class NAPs become mutually inconsistent in the valid input domain.
+> different class NAPs become mutually inconsistent in the valid input domain, and the rate at which this happens depends on architecture capacity.
 
 Direct rejection says:
 
-> misclassified samples increasingly violate the NAP of their true class.
+> the original true-class check shows that misclassified samples increasingly violate their true-class NAP; the cross-model follow-up uses the practical predicted-class metric and shows that wrong-predicted samples increasingly violate the NAP of the class they were predicted into.
 
-Together, they show that the learned NAP rules do not merely increase verification rates. They also become class-specific exclusion constraints as training progresses.
+Together, they show that the learned NAP rules do not merely increase verification rates. They become class-specific exclusion constraints as training progresses, and the phenomenon is not a quirk of a single seed or a single architecture.

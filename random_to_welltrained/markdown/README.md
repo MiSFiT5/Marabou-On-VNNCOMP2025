@@ -106,7 +106,7 @@ See [Step4_NAP_Rejection_Evidence.md](Step4_NAP_Rejection_Evidence.md).
 
 ### 5. Follow-up: Last-n Layer Ablation for Unary NAP
 
-The layer-ablation follow-up shows that the small-radius unary ON/OFF signal is concentrated in the final layers. At `eps=0.01`, `alpha=0.99`, using only `last1` (`L6`) already reaches `18/18/2/0` on Track A final and `20/20/0/0` on Track B final, where the cell format is `genuine / verified / timeout / misclassified`. In contrast, full-layer `last7` at `alpha=0.95` is inflated by vacuity: Track A final is `9/19/1/0`, and Track B final is `10/20/0/0`. At `eps=0.02`, the result is timeout-limited rather than adversarial-dominated.
+The layer-ablation follow-up shows that the small-radius unary ON/OFF signal is concentrated in the final layers. At `eps=0.01`, `alpha=0.99`, using only `last1` (`L6`) already reaches `18/18/2` on Track A final and `20/20/0` on Track B final (genuine / verified / timeout format). In contrast, full-layer `last7` at `alpha=0.95` is inflated by vacuity: Track A final is `9/19/1`, and Track B final is `10/20/0`. At `eps=0.02`, the result is solver-time-limited: a high-timeout re-run at 2700s found zero adversarial examples but resolved many timeouts into verified — particularly for deeper configs on Track B (`last5`: 8→15 genuine, `last7`: 10→15 genuine at final). The disjunctive encoding is less effective than per-target-class solving at finding SAT witnesses even at equal time budgets.
 
 See [Step4_Unary_Layer_Ablation.md](Step4_Unary_Layer_Ablation.md).
 

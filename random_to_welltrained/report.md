@@ -333,6 +333,19 @@ Detailed checkpoint tables and figures are in:
 
 - [`markdown/Step4_Unary_Layer_Ablation.md`](markdown/Step4_Unary_Layer_Ablation.md)
 
+### 4.7 Follow-up: Runtime Profile of the Ablation Tasks
+
+The 8397 per-task elapsed times in the ablation experiment were also aggregated. The distribution is bimodal: verified proofs typically finish in under 30 s (median `9.54 s`), while unresolved cases almost always run to the 600 s timeout (median `604.78 s`). The primary driver is `eps`: at `eps=0.01` only `11.5%` of non-skipped tasks timeout; at `eps=0.02` that becomes `82.4%`; at `eps=0.05` every non-skipped task times out. Within a given `eps`, adding layers and lowering alpha shrink the feasible region and reduce both median runtime and timeout count — at `eps=0.01` the median drops from `12.99 s` on `last1` to `7.44 s` on `last7`.
+
+This has two reading consequences:
+
+- The `eps=0.05` row in the main tables is a solver-capacity observation (no task decides), not a specification-quality observation.
+- The "more layers and lower alpha are faster" effect is consistent with the vacuity story in Section 4.6: stronger unary constraints shrink the feasible region, which helps the solver prove UNSAT faster, but must be read together with how many of those proofs are vacuous.
+
+Detailed runtime tables and figures are in:
+
+- [`markdown/Step4_Unary_Layer_Ablation.md`](markdown/Step4_Unary_Layer_Ablation.md) (Section 10)
+
 ## 5. Act V: What Does NAP Do to Misclassified Samples?
 
 ### 5.1 Misclassified-Sample Rejection
@@ -430,6 +443,30 @@ The direct pointwise rejection experiment gives the cleaner rejection interpreta
 Detailed tables and figures are in:
 
 - [`markdown/Step4_NAP_Rejection_Evidence.md`](markdown/Step4_NAP_Rejection_Evidence.md)
+
+### 5.5 Follow-up: Does the Same Rejection / Separation Hold Across Seeds and Architectures?
+
+A later follow-up repeats the direct rejection and pairwise overlap checks across five models: three `7x250` runs with different seeds (`0, 42, 123`), one smaller `seed0_4x250`, and one narrower `seed0_7x100`. Each model is evaluated at progress `0, 25, 50, 75, 100%`, with an additional fine sweep at epochs `5, 10, 15, 20` to resolve the early training transition.
+
+For direct rejection at `alpha=0.99`, using the predicted-class NAP metric (`mis_rej_pred_pct`):
+
+- The three `7x250` seeds are consistent: after 25% training all three sit in the `92.9%-96.3%` band; from 50% onward in `94.8%-98.6%`.
+- `seed0_4x250` starts lower at 25% (`88.1%`) but catches up by 75%-100%.
+- `seed0_7x100` is visibly weaker at every stage: `78.9%` at 25% and only `92.5%` at 100%, below any `7x250` seed.
+- In the early sweep, `7x250` takes the main jump between epoch 5 and epoch 10 and stabilizes by epoch 15-20; `4x250` follows the same shape but later; `7x100` is slower and still climbing at epoch 25.
+
+For pairwise overlap at `alpha=0.99`:
+
+- The three `7x250` models have zero solver-proved overlap from epoch 20 onward.
+- `seed0_4x250` and `seed0_7x100` still have nonzero overlap at epoch 50 and only have zero solver-proved overlap by epoch 75; they also carry residual timeouts at 75-100%. `timeout` is not the same as `overlap` — it means the solver did not decide, not that overlap exists.
+
+So the cross-seed / cross-architecture picture is:
+
+> The rejection and separation phenomena are stable across seeds for the same `7x250` architecture. Across architectures, the direction is preserved but the failure mode differs: `4x250` catches up in predicted-class rejection but keeps pairwise overlap longer, while `7x100` has lower predicted-class rejection and also delayed pairwise separation.
+
+Detailed cross-model tables, including `overlap / timeout` breakdowns per model and per progress, are in:
+
+- [`markdown/Step4_NAP_Rejection_Evidence.md`](markdown/Step4_NAP_Rejection_Evidence.md) (Sections 1.3 and 1.4)
 
 ## 6. Act VI: What Do the Fixed References Themselves Look Like?
 
@@ -567,6 +604,10 @@ This section takes the genunied verified rate. without vacuous check, all 3 mode
 4. in late training progress(75% - 100%), the performence goes down (Not overfitting)
 
 5. in late training progress, we observe that basically only a few rules modified according to the similarity of the rules, in number, some ALWAYS_OFF disappeared and ALWAYS_ON came out. (section 7)
+
+6. The rejection and class-separation phenomena are not specific to Track A / Track B. Across three `7x250` seeds the direct-rejection rate at `alpha=0.99` is consistent (about `93-97%` from 25% onward), and no solver-proved pairwise class-NAP overlap remains by epoch 20 in all three. The same direction holds for smaller `4x250` and narrower `7x100` networks, but with weaker strength and delayed emergence — solver-proved overlap only reaches zero around epoch 75, and residual timeout cases remain unresolved. The effect is a property of training, not of a single seed or architecture.
+
+7. Ablation runtime is dominated by `eps`, not by layer config or alpha. Verified proofs finish fast (median about `10 s`); unresolved cases hit the 600 s timeout. `eps=0.05` shows 0% verified not because NAP fails there, but because every task times out under the current encoding; this is a solver-capacity observation and should not be read as a specification result.
 
 
 # Notes
