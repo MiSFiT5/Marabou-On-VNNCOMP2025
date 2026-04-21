@@ -63,7 +63,7 @@ where:
 - **verified**: Marabou returned UNSAT for the adversarial query, including vacuous cases;
 - **timeout**: Marabou did not return a final answer within 600s.
 
-The denominator is always 20 fixed refs. An asterisk `*` marks a row with one missing verification task. When adversarial counterexamples are found, `N=<count>` is appended to the cell.
+The denominator is always 20 fixed refs. An asterisk `*` marks a row with one missing verification task. For example, `1/1/18*` means 1 genuine proof, 1 total UNSAT proof, 18 timeouts, and 1 missing task. It does **not** mean an adversarial example was found. When adversarial counterexamples are found, `N=<count>` is appended to the cell.
 
 For baseline (no NAP constraints), genuine = verified always (no vacuity possible). Baseline data comes from `step4_marabou_v2` which uses per-target encoding (up to 2700s).
 
@@ -312,48 +312,101 @@ At `eps=0.02` and `eps=0.05`, all 5 eligible refs timeout across all configs at 
 
 ---
 
-## 8. Time Consumption of the 600s Ablation Verify Tasks
+## 8. Time Consumption of Verified Proofs
 
-Runtime statistics are computed from the 600s full ablation verify JSON files:
+Runtime statistics are computed from:
 
+- `generated/step4_marabou_v2/results/verify_all.csv` (baseline, per-target solver)
 - `generated/step4_unary_ablation_full_A/results/verify/*.json`
 - `generated/step4_unary_ablation_full_B/results/verify/*.json`
 
-`misclassified` rows are skipped before Marabou solving and record zero runtime, so they are excluded from the solver-time statistics below. The `overall` columns therefore mean all solver-executed verify tasks, i.e. `UNSAT` plus timeout tasks. In this 600s ablation run, Marabou returned **no SAT/adversarial result** for any layer-ablation query, so every `SAT` count is zero.
+The figures plot only verified/UNSAT median runtime, using the same rows as the tables below. For baseline, timeout and adversarial runtimes are intentionally not reported here because the baseline uses a different per-target encoding and can run up to 2700s; those entries are marked as `—`. For the layer-ablation rows, the `overall` columns are still shown to indicate how timeout-dominated the 600s disjunctive runs are.
 
-The CSV version of this table is saved as:
+The CSV version of these tables is saved as:
 
-- `markdown/step4_followup_assets/layer_ablation_600s_time_by_checkpoint_alpha.csv`
+- `markdown/step4_followup_assets/layer_ablation_600s_verified_time_eps001_eps002_with_baseline.csv`
 
-| Track | Checkpoint | Progress | Alpha | UNSAT n | UNSAT mean | UNSAT median | SAT n | SAT mean | SAT median | Overall n | Overall mean | Overall median |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| A | `epoch_000` | 0% | 0.95 | 21 | 40.10s | 7.65s | 0 | — | — | 105 | 519.51s | 611.79s |
-| A | `epoch_000` | 0% | 0.99 | 20 | 99.56s | 71.10s | 0 | — | — | 105 | 532.95s | 610.15s |
-| A | `epoch_018` | 25% | 0.95 | 137 | 45.86s | 8.63s | 0 | — | — | 420 | 427.02s | 601.40s |
-| A | `epoch_018` | 25% | 0.99 | 111 | 13.74s | 8.86s | 0 | — | — | 420 | 455.02s | 603.06s |
-| A | `epoch_035` | 50% | 0.95 | 158 | 32.34s | 7.59s | 0 | — | — | 418 | 391.23s | 600.90s |
-| A | `epoch_035` | 50% | 0.99 | 122 | 41.71s | 8.63s | 0 | — | — | 419 | 444.88s | 602.01s |
-| A | `epoch_052` | 75% | 0.95 | 170 | 30.74s | 7.20s | 0 | — | — | 420 | 374.83s | 600.65s |
-| A | `epoch_052` | 75% | 0.99 | 152 | 28.30s | 8.04s | 0 | — | — | 420 | 399.30s | 601.43s |
-| A | `epoch_070` | 100% | 0.95 | 173 | 23.23s | 7.36s | 0 | — | — | 420 | 367.06s | 601.06s |
-| A | `epoch_070` | 100% | 0.99 | 153 | 26.12s | 7.86s | 0 | — | — | 420 | 396.83s | 601.44s |
-| B | `epoch_000` | 0% | 0.95 | 21 | 59.34s | 11.50s | 0 | — | — | 105 | 527.83s | 615.80s |
-| B | `epoch_000` | 0% | 0.99 | 18 | 94.34s | 110.63s | 0 | — | — | 105 | 557.98s | 615.97s |
-| B | `epoch_025` | 25% | 0.95 | 125 | 41.75s | 10.90s | 0 | — | — | 420 | 443.14s | 601.98s |
-| B | `epoch_025` | 25% | 0.99 | 98 | 29.78s | 11.83s | 0 | — | — | 420 | 477.95s | 603.23s |
-| B | `epoch_050` | 50% | 0.95 | 167 | 30.89s | 10.18s | 0 | — | — | 420 | 379.96s | 601.52s |
-| B | `epoch_050` | 50% | 0.99 | 144 | 35.92s | 11.10s | 0 | — | — | 420 | 414.24s | 602.45s |
-| B | `epoch_075` | 75% | 0.95 | 196 | 41.68s | 10.02s | 0 | — | — | 420 | 344.61s | 600.50s |
-| B | `epoch_075` | 75% | 0.99 | 170 | 37.52s | 10.79s | 0 | — | — | 420 | 378.19s | 601.04s |
-| B | `epoch_100` | 100% | 0.95 | 194 | 40.61s | 10.26s | 0 | — | — | 420 | 346.24s | 600.54s |
-| B | `epoch_100` | 100% | 0.99 | 176 | 24.59s | 10.87s | 0 | — | — | 420 | 364.72s | 601.30s |
+### `eps=0.01`
+
+![Layer ablation verified-only runtime, eps=0.01](step4_followup_assets/layer_ablation_verified_runtime_table_eps001.png)
+
+| Method | Track | Checkpoint | Progress | Alpha | UNSAT n | UNSAT mean | UNSAT median | SAT n | SAT mean | SAT median | Overall n | Overall mean | Overall median |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline | A | `epoch_000` | 0% | — | 0 | — | — | — | — | — | — | — | — |
+| baseline | A | `epoch_018` | 25% | — | 15 | 32.92s | 30.52s | — | — | — | — | — | — |
+| baseline | A | `epoch_035` | 50% | — | 15 | 33.26s | 30.21s | — | — | — | — | — | — |
+| baseline | A | `epoch_052` | 75% | — | 17 | 31.00s | 26.86s | — | — | — | — | — | — |
+| baseline | A | `epoch_070` | 100% | — | 17 | 31.35s | 30.28s | — | — | — | — | — | — |
+| baseline | B | `epoch_000` | 0% | — | 0 | — | — | — | — | — | — | — | — |
+| baseline | B | `epoch_025` | 25% | — | 14 | 26.01s | 24.92s | — | — | — | — | — | — |
+| baseline | B | `epoch_050` | 50% | — | 16 | 27.21s | 27.68s | — | — | — | — | — | — |
+| baseline | B | `epoch_075` | 75% | — | 18 | 26.55s | 27.25s | — | — | — | — | — | — |
+| baseline | B | `epoch_100` | 100% | — | 18 | 27.52s | 29.35s | — | — | — | — | — | — |
+| layer ablation | A | `epoch_000` | 0% | 0.95 | 21 | 40.10s | 7.65s | 0 | — | — | 35 | 280.66s | 82.25s |
+| layer ablation | A | `epoch_000` | 0% | 0.99 | 20 | 99.56s | 71.10s | 0 | — | — | 35 | 328.50s | 91.06s |
+| layer ablation | A | `epoch_018` | 25% | 0.95 | 129 | 45.03s | 8.63s | 0 | — | — | 140 | 88.79s | 8.78s |
+| layer ablation | A | `epoch_018` | 25% | 0.99 | 107 | 12.63s | 8.84s | 0 | — | — | 140 | 152.83s | 9.96s |
+| layer ablation | A | `epoch_035` | 50% | 0.95 | 129 | 21.09s | 7.40s | 0 | — | — | 140 | 66.73s | 7.65s |
+| layer ablation | A | `epoch_035` | 50% | 0.99 | 114 | 28.17s | 8.62s | 0 | — | — | 140 | 135.15s | 8.89s |
+| layer ablation | A | `epoch_052` | 75% | 0.95 | 132 | 14.94s | 6.86s | 0 | — | — | 140 | 48.57s | 6.96s |
+| layer ablation | A | `epoch_052` | 75% | 0.99 | 129 | 18.90s | 7.68s | 0 | — | — | 140 | 64.69s | 8.04s |
+| layer ablation | A | `epoch_070` | 100% | 0.95 | 131 | 10.98s | 7.12s | 0 | — | — | 140 | 49.14s | 7.24s |
+| layer ablation | A | `epoch_070` | 100% | 0.99 | 130 | 19.32s | 7.72s | 0 | — | — | 140 | 60.99s | 8.02s |
+| layer ablation | B | `epoch_000` | 0% | 0.95 | 21 | 59.34s | 11.50s | 0 | — | — | 35 | 300.04s | 145.66s |
+| layer ablation | B | `epoch_000` | 0% | 0.99 | 18 | 94.34s | 110.63s | 0 | — | — | 35 | 369.88s | 151.00s |
+| layer ablation | B | `epoch_025` | 25% | 0.95 | 119 | 32.42s | 10.90s | 0 | — | — | 140 | 119.84s | 11.54s |
+| layer ablation | B | `epoch_025` | 25% | 0.99 | 98 | 29.78s | 11.83s | 0 | — | — | 140 | 201.89s | 12.85s |
+| layer ablation | B | `epoch_050` | 50% | 0.95 | 128 | 18.92s | 9.64s | 0 | — | — | 140 | 69.29s | 10.02s |
+| layer ablation | B | `epoch_050` | 50% | 0.99 | 121 | 30.10s | 10.94s | 0 | — | — | 140 | 107.94s | 11.27s |
+| layer ablation | B | `epoch_075` | 75% | 0.95 | 140 | 13.30s | 9.12s | 0 | — | — | 140 | 13.30s | 9.12s |
+| layer ablation | B | `epoch_075` | 75% | 0.99 | 140 | 21.82s | 10.06s | 0 | — | — | 140 | 21.82s | 10.06s |
+| layer ablation | B | `epoch_100` | 100% | 0.95 | 140 | 12.98s | 9.30s | 0 | — | — | 140 | 12.98s | 9.30s |
+| layer ablation | B | `epoch_100` | 100% | 0.99 | 140 | 18.06s | 10.12s | 0 | — | — | 140 | 18.06s | 10.12s |
+
+### `eps=0.02`
+
+![Layer ablation verified-only runtime, eps=0.02](step4_followup_assets/layer_ablation_verified_runtime_table_eps002.png)
+
+| Method | Track | Checkpoint | Progress | Alpha | UNSAT n | UNSAT mean | UNSAT median | SAT n | SAT mean | SAT median | Overall n | Overall mean | Overall median |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline | A | `epoch_000` | 0% | — | 0 | — | — | — | — | — | — | — | — |
+| baseline | A | `epoch_018` | 25% | — | 1 | 22.22s | 22.22s | — | — | — | — | — | — |
+| baseline | A | `epoch_035` | 50% | — | 3 | 29.41s | 29.81s | — | — | — | — | — | — |
+| baseline | A | `epoch_052` | 75% | — | 3 | 24.72s | 22.14s | — | — | — | — | — | — |
+| baseline | A | `epoch_070` | 100% | — | 3 | 27.78s | 30.06s | — | — | — | — | — | — |
+| baseline | B | `epoch_000` | 0% | — | 0 | — | — | — | — | — | — | — | — |
+| baseline | B | `epoch_025` | 25% | — | 0 | — | — | — | — | — | — | — | — |
+| baseline | B | `epoch_050` | 50% | — | 3 | 30.80s | 31.06s | — | — | — | — | — | — |
+| baseline | B | `epoch_075` | 75% | — | 4 | 28.47s | 30.52s | — | — | — | — | — | — |
+| baseline | B | `epoch_100` | 100% | — | 4 | 30.42s | 30.31s | — | — | — | — | — | — |
+| layer ablation | A | `epoch_000` | 0% | 0.95 | 0 | — | — | 0 | — | — | 35 | 634.71s | 622.05s |
+| layer ablation | A | `epoch_000` | 0% | 0.99 | 0 | — | — | 0 | — | — | 35 | 639.06s | 614.04s |
+| layer ablation | A | `epoch_018` | 25% | 0.95 | 8 | 59.20s | 8.77s | 0 | — | — | 140 | 573.08s | 602.19s |
+| layer ablation | A | `epoch_018` | 25% | 0.99 | 4 | 43.48s | 10.96s | 0 | — | — | 140 | 590.52s | 603.13s |
+| layer ablation | A | `epoch_035` | 50% | 0.95 | 29 | 82.36s | 10.90s | 0 | — | — | 138 | 494.28s | 601.29s |
+| layer ablation | A | `epoch_035` | 50% | 0.99 | 8 | 234.63s | 140.51s | 0 | — | — | 139 | 583.70s | 602.14s |
+| layer ablation | A | `epoch_052` | 75% | 0.95 | 38 | 85.59s | 10.36s | 0 | — | — | 140 | 463.70s | 600.99s |
+| layer ablation | A | `epoch_052` | 75% | 0.99 | 23 | 80.99s | 8.88s | 0 | — | — | 140 | 518.63s | 602.08s |
+| layer ablation | A | `epoch_070` | 100% | 0.95 | 42 | 61.43s | 9.20s | 0 | — | — | 140 | 442.41s | 601.53s |
+| layer ablation | A | `epoch_070` | 100% | 0.99 | 23 | 64.55s | 8.60s | 0 | — | — | 140 | 515.68s | 601.69s |
+| layer ablation | B | `epoch_000` | 0% | 0.95 | 0 | — | — | 0 | — | — | 35 | 653.50s | 634.12s |
+| layer ablation | B | `epoch_000` | 0% | 0.99 | 0 | — | — | 0 | — | — | 35 | 654.71s | 621.91s |
+| layer ablation | B | `epoch_025` | 25% | 0.95 | 6 | 226.61s | 170.36s | 0 | — | — | 140 | 590.89s | 602.30s |
+| layer ablation | B | `epoch_025` | 25% | 0.99 | 0 | — | — | 0 | — | — | 140 | 609.64s | 604.01s |
+| layer ablation | B | `epoch_050` | 50% | 0.95 | 39 | 70.17s | 11.91s | 0 | — | — | 140 | 458.19s | 602.10s |
+| layer ablation | B | `epoch_050` | 50% | 0.99 | 23 | 66.53s | 12.99s | 0 | — | — | 140 | 518.27s | 602.99s |
+| layer ablation | B | `epoch_075` | 75% | 0.95 | 56 | 112.63s | 13.25s | 0 | — | — | 140 | 409.16s | 601.36s |
+| layer ablation | B | `epoch_075` | 75% | 0.99 | 30 | 110.76s | 13.26s | 0 | — | — | 140 | 498.46s | 601.84s |
+| layer ablation | B | `epoch_100` | 100% | 0.95 | 54 | 112.23s | 12.68s | 0 | — | — | 140 | 415.33s | 601.48s |
+| layer ablation | B | `epoch_100` | 100% | 0.99 | 36 | 50.02s | 17.66s | 0 | — | — | 140 | 462.69s | 602.21s |
 
 Direct reading:
 
-- Verified/UNSAT tasks are usually fast once they are solved: most medians are around `7-12s`.
-- The overall medians are close to `600s` because timeout cases dominate the unresolved mass.
-- There are no SAT rows to summarize in this 600s ablation run; the SAT mean and median are therefore undefined rather than zero.
-- Track A at 50% has `418/419` solver tasks instead of `420` because of the three missing verify JSONs noted above.
+- The runtime plots are verified-only: every line is based on the `UNSAT median` column, not timeout or overall runtime.
+- Baseline timeout and SAT/adversarial runtime entries are deliberately hidden as `—` because their 2700s per-target budget is not comparable with the 600s disjunctive ablation budget.
+- At `eps=0.01`, ablation verified proofs are often faster than baseline verified proofs after training, especially for `alpha=0.95`.
+- At `eps=0.02`, the ablation still has many timeouts, but the verified proofs that do finish often complete quickly; the timeout burden is visible only in the ablation `overall` columns.
+- Track A at 50%, `eps=0.02`, has `138/139` ablation solver tasks instead of `140` because of the three missing verify JSONs noted above.
 
 ---
 

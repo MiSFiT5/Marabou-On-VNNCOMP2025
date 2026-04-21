@@ -336,13 +336,13 @@ Detailed checkpoint tables and figures are in:
 
 ### 4.7 Follow-up: Runtime Profile of the Ablation Tasks
 
-The 600s full ablation run has 8397 recorded verification-task JSONs. Excluding `misclassified` rows, which are skipped before Marabou solving and record zero runtime, the solver-executed tasks contain 2526 UNSAT proofs and 4611 timeouts. No SAT/adversarial result was returned by the 600s layer-ablation queries.
+The runtime follow-up now focuses on verified/UNSAT proof time. Baseline timeout and adversarial runtimes are intentionally not summarized here because the baseline uses a per-target encoding with up to 2700s total budget, while the layer ablation uses one disjunctive query with a 600s timeout.
 
 This has three reading consequences:
 
-- Verified/UNSAT proofs are usually fast once solved: per-checkpoint/per-alpha medians are mostly around `7-12s`.
-- The overall per-checkpoint/per-alpha medians are close to `600s` because timeout cases dominate the unresolved mass.
-- Since SAT count is zero in this run, the SAT mean and median are undefined rather than zero.
+- The runtime line plots use only the `UNSAT median` column from the corresponding tables.
+- At `eps=0.01`, many ablation verified proofs are faster than the baseline verified proofs after training.
+- At `eps=0.02`, unresolved ablation cases are still timeout-dominated, but the verified proofs that do finish are often short.
 
 The detailed runtime table is in:
 
@@ -609,7 +609,7 @@ This section takes the genunied verified rate. without vacuous check, all 3 mode
 
 6. The rejection and class-separation phenomena are not specific to Track A / Track B. Across three `7x250` seeds the direct-rejection rate at `alpha=0.99` is consistent (about `93-97%` from 25% onward), and no solver-proved pairwise class-NAP overlap remains by epoch 20 in all three. The same direction holds for smaller `4x250` and narrower `7x100` networks, but with weaker strength and delayed emergence — solver-proved overlap only reaches zero around epoch 75, and residual timeout cases remain unresolved. The effect is a property of training, not of a single seed or architecture.
 
-7. In the 600s layer-ablation run, unresolved cases are timeout-dominated. Verified/UNSAT proofs are usually much faster, with per-checkpoint/per-alpha medians mostly around `7-12s`, while overall medians stay near the 600s timeout budget. No SAT result was returned by the layer-ablation queries under this encoding and timeout.
+7. In the layer-ablation runtime summary, the line plots compare verified/UNSAT proof time only. Baseline timeout runtimes are omitted because its per-target 2700s budget is not comparable with the ablation's 600s disjunctive budget. Under this verified-only view, ablation proofs are often faster at `eps=0.01`, while `eps=0.02` remains timeout-heavy overall.
 
 
 # Notes
